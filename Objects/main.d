@@ -33,3 +33,5 @@
 .\objects\main.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\main.o: .\Hardware\Serial.h
 .\objects\main.o: .\Hardware\delay.h
+.\objects\main.o: .\Hardware\LM2904.h
+.\objects\main.o: .\Hardware\PM25.h

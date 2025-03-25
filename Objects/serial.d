@@ -30,3 +30,5 @@
 .\objects\serial.o: .\Library\misc.h
 .\objects\serial.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\serial.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
+.\objects\serial.o: Hardware\PM25.h
+.\objects\serial.o: Hardware\Serial.h

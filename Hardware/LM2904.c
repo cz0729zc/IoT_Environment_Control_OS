@@ -3,6 +3,7 @@
 #include "stm32f10x_dma.h"
 #include "stm32f10x_gpio.h"
 #include "delay.h"
+
 #define ADC1_DR_Address    ((uint32_t)0x4001244C)  // ADC1数据寄存器地址
 
 static volatile uint16_t ADC_ConvertedValue = 0;
@@ -62,4 +63,8 @@ void LM2904_Init(void) {
 
 uint16_t LM2904_ReadValue(void) {
     return ADC_ConvertedValue;
+}
+
+float ConvertToDecibel(uint16_t adc_value) {
+    return 30.0f + (adc_value - 800.0f) * 0.2f;  // 每ADC单位对应0.2dB
 }

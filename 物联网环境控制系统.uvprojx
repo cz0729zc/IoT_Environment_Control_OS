@@ -745,6 +745,16 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\delay.h</FilePath>
             </File>
+            <File>
+              <FileName>PM25.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\PM25.c</FilePath>
+            </File>
+            <File>
+              <FileName>PM25.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\PM25.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

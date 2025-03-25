@@ -10,6 +10,5 @@
 
 void LM2904_Init(void);
 uint16_t LM2904_ReadValue(void);
-
-void LM2904_DisplayUpdate(void); // 新增显示更新函数
+float ConvertToDecibel(uint16_t adc_value);
 #endif

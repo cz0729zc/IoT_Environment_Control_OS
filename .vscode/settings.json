@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "lm2904.h": "c",
+        "pm25.h": "c",
+        "stm32f10x.h": "c",
+        "string": "c"
+    }
+}

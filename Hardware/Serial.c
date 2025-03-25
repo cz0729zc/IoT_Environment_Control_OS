@@ -1,10 +1,13 @@
 #include "stm32f10x.h"                  // Device header
 #include <stdio.h>
 #include <stdarg.h>
+#include "PM25.h"
+#include "Serial.h"
 
 uint8_t Serial_RxData;
 uint8_t Serial_RxFlag;
-//引脚为PA9 TX和PA10 采用APB2外设USART1
+
+//引脚为PA9 TX和PA10 RX采用APB2外设USART1
 void Serial_Init(void)
 {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
@@ -29,6 +32,7 @@ void Serial_Init(void)
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_Init(USART1, &USART_InitStructure);
+
 	
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 	
@@ -118,12 +122,14 @@ uint8_t Serial_GetRxData(void)
 	return Serial_RxData;
 }
 
-void USART1_IRQHandler(void)
-{
-	if (USART_GetITStatus(USART1, USART_IT_RXNE) == SET)
-	{
-		Serial_RxData = USART_ReceiveData(USART1);
-		Serial_RxFlag = 1;
-		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
-	}
+void USART1_IRQHandler(void) {
+    if(USART_GetITStatus(USART1, USART_IT_RXNE) == SET) {
+		//Serial_SendString("\r\n 进入串口中断");
+        uint8_t data = USART_ReceiveData(USART1);
+        PM25_ReceiveHandler(data);  // PM2.5数据处理调用
+		//Serial_SendByte(data);
+        Serial_RxData = data;
+        Serial_RxFlag = 1;
+        USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+    }
 }
