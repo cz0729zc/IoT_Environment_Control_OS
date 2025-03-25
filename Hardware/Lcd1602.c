@@ -12,7 +12,7 @@ static void delay_us(uint32_t us) {
 
 static void delay_ms(uint32_t ms) {
     while(ms--) {
-        delay_us(1000);
+        delay_us(400);
     }
 }
 
@@ -44,9 +44,9 @@ void LCD_WriteCommand(uint8_t cmd) {
     
     // 产生EN脉冲
     GPIO_SetBits(LCD_EN_GPIO, LCD_EN_PIN);
-    delay_ms(5);
+    delay_ms(1);
     GPIO_ResetBits(LCD_EN_GPIO, LCD_EN_PIN);
-    delay_ms(4);
+    delay_ms(1);
 }
 
 // 写数据
@@ -57,15 +57,15 @@ void LCD_WriteData(uint8_t data) {
     GPIO_Write(LCD_DATA_GPIO, (GPIO_ReadOutputData(LCD_DATA_GPIO) & 0xFF00) | data);
     
     GPIO_SetBits(LCD_EN_GPIO, LCD_EN_PIN);
-    delay_ms(5);
+    delay_ms(1);
     GPIO_ResetBits(LCD_EN_GPIO, LCD_EN_PIN);
-    delay_ms(4);
+    delay_ms(1);
 }
 
 // 初始化LCD
 void LCD_Init(void) {
     GPIO_Config();
-    delay_ms(500); // LCD上电复位
+    delay_ms(50); // LCD上电复位
     
     LCD_WriteCommand(0x38); // 8位模式，2行显示
     LCD_WriteCommand(0x0C); // 显示开，光标关
@@ -112,4 +112,10 @@ void LCD_PrintString(uint8_t x,uint8_t y, char *str) {
 void LCD_Clear(void) {
     LCD_WriteCommand(0x01);
     delay_ms(2);
+}
+
+
+void LCD_ClearChar(uint8_t x, uint8_t y) {
+    LCD_SetCursor(x, y);
+    LCD_WriteData(' '); // 写入空格字符
 }

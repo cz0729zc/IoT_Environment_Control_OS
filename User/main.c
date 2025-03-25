@@ -6,32 +6,49 @@
 #include "delay.h"
 #include "LM2904.h"
 #include "PM25.h"
+#include "keys.h"
+#include "LY69.h"
 
-#define TEMP_ALARM 30  // 温度报警阈值
-#define HUMI_ALARM 80  // 湿度报警阈值
+/* 系统状态定义 */
 
-// 显示位置定义
+typedef enum {
+    STATE_THRESHOLD = 0,    // 阈值设置界面
+    STATE_PM25,              // PM2.5显示界面
+    STATE_REALTIME           // 实时数据显示界面
+} SystemState;
+
+/* 阈值设置界面中的选中项 */
+typedef enum {
+    SEL_TEMP = 0,   // 选中温度
+    SEL_HUMI,       // 选中湿度
+    SEL_NOISE       // 选中噪声
+} SelectState;
+
+/* 全局变量 */
+SystemState g_state = STATE_THRESHOLD;  // 初始状态为阈值设置
+SelectState g_select = SEL_TEMP;        // 初始选中温度
+
+/* 阈值 */
+uint8_t g_temp_thres = 30;
+uint8_t g_humi_thres = 80;
+uint8_t g_noise_thres = 60;
+
+/* 显示位置定义 */
 #define TEMP_STR_ROW 1  
 #define TEMP_STR_COL 0
 #define TEMP_VAL_ROW 1
-#define TEMP_VAL_COL 3  // "Temp:"占5个字符，数值从第5列开始
-
-#define HUMI_STR_ROW 2
+#define TEMP_VAL_COL 3
+#define HUMI_STR_ROW 1
 #define HUMI_STR_COL 0
-#define HUMI_VAL_ROW 2
-#define HUMI_VAL_COL 3  // "Humi:"占5个字符，数值从第5列开始
-
-#define NOISE_STR_ROW 1 // 噪声显示在第1行右侧
-#define NOISE_VAL_ROW 0
-
+#define HUMI_VAL_ROW 1
+#define HUMI_VAL_COL 12
+#define NOISE_STR_ROW 2
+#define NOISE_VAL_ROW 5
 #define PM25_STR_ROW 1
 #define PM25_STR_COL 0
 #define PM25_VAL_ROW 1
 #define PM25_VAL_COL 6
-
-#define COLUMN_OFFSET 9  // 右侧区域起始列
-
-#define DEBUG_PM25_PROTOCOL //debug模式
+#define COLUMN_OFFSET 9
 
 int main(void)
 {
@@ -40,68 +57,145 @@ int main(void)
     uint16_t noise_adc;
     char display_str[16];
 
+    // 初始化
     LCD_Init();
-	LM2904_Init();
-	Serial_Init();
+    LM2904_Init();
+    Serial_Init();
     PM25_Init();
-    // 初始化固定显示内容
-    // LCD_PrintString(TEMP_STR_ROW, TEMP_STR_COL, "T:    C");  // 预留4字符空间
-    // LCD_PrintString(HUMI_STR_ROW, HUMI_STR_COL, "H:    %");  // 预留4字符空间
-    // LCD_PrintString(NOISE_STR_ROW, COLUMN_OFFSET, "N:   dB"); // 新增噪声标签
-	LCD_PrintString(PM25_STR_ROW, PM25_STR_COL, "PM2.5:   ug/m3");
-    //Serial_Printf("\r\n ****************************************************************");
-    while(1)
-    {
-        // if(DHT_Get_Temp_Humi_Data(dht_buffer) && 
-        //   (dht_buffer[4] == (dht_buffer[0]+dht_buffer[1]+dht_buffer[2]+dht_buffer[3])))
-        // {
-		// 	 Serial_SendString("\r\n进入if判断");
-        //     humidity = dht_buffer[0] + dht_buffer[1] * 0.1;
-        //     temperature = dht_buffer[2] + dht_buffer[3] * 0.1;
+    Key_Init();
+	SoilHumidity_Init();
+	
+    // 初始显示
+    LCD_PrintString(1, 0, "Loading System...");
+    delay_ms(1000);
+    LCD_Clear();
 
-        //     // 更新温度数值（固定4字符宽度）
-        //     sprintf(display_str, "%4.1f", temperature);
-        //     LCD_PrintString(TEMP_VAL_ROW, TEMP_VAL_COL, display_str);
+    while (1) {
+        // 按键处理
+        Key_Value key = Key_Scan();
 
-        //     // 更新湿度数值（固定4字符宽度）
-        //     sprintf(display_str, "%4.1f", humidity);
-        //     LCD_PrintString(HUMI_VAL_ROW, HUMI_VAL_COL, display_str);
-        // }
-        // else
-        // {
-		// 	//Serial_SendString("\r\n进入else判断");
-        //     // 错误提示（仅覆盖数值区域）
-        //     LCD_PrintString(TEMP_VAL_ROW, TEMP_VAL_COL, "ERR");
-        //     LCD_PrintString(HUMI_VAL_ROW, HUMI_VAL_COL, "ERR");
-        // }
+        switch (key) {
+            case KEY_UP:  // 切换界面
+                g_state = (g_state + 1) % 3;
+                LCD_Clear();
+                break;
 
-        // /* 噪声显示处理 */
-        // noise_adc = ConvertToDecibel(LM2904_ReadValue());
-        // sprintf(display_str, "%3d", noise_adc);
-        // LCD_PrintString(NOISE_STR_ROW, COLUMN_OFFSET+2, display_str); // 数值显示位置
+            case KEY_DOWN:  // 切换选中项（仅在阈值设置界面有效）
+                if (g_state == STATE_THRESHOLD) {
+                    g_select = (g_select + 1) % 3;
+                }
+                break;
 
-        PM25_Data pm_data = PM25_GetCurrentData();
+            case KEY_ADD:  // 增加选中参数的值
+                if (g_state == STATE_THRESHOLD) {
+                    switch (g_select) {
+                        case SEL_TEMP: g_temp_thres++; break;
+                        case SEL_HUMI: g_humi_thres++; break;
+                        case SEL_NOISE: g_noise_thres++; break;
+                    }
+                }
+                break;
 
-        if(pm_data.data_valid) 
-        {
-            char lcd_line1[17];  // LCD1602每行16字符+结束符
-            char lcd_line2[17];
-            //Serial_Printf("pm25_value: %04f\n", pm_data.pm25_value);
-            // 第一行显示PM2.5浓度（带单位）
-            snprintf(lcd_line1, sizeof(lcd_line1), "PM2.5:%3.0fug/m3", pm_data.pm25_value);
-			
-			if(pm_data.pm25_value != 0)
-			{
-				LCD_Clear();        
-				LCD_PrintString(1, 0, lcd_line1);				
-			}
-        
-            pm_data.data_valid = 0;  // 清除有效标志
+            case KEY_SUB:  // 减少选中参数的值
+                if (g_state == STATE_THRESHOLD) {
+                    switch (g_select) {
+                        case SEL_TEMP: g_temp_thres--; break;
+                        case SEL_HUMI: g_humi_thres--; break;
+                        case SEL_NOISE: g_noise_thres--; break;
+                    }
+                }
+                break;
         }
-		else{
-			LCD_PrintString(PM25_VAL_ROW,PM25_VAL_COL+1,"err");
-		}
 
-        delay_ms(2000);
+        // 根据状态显示不同内容
+        switch (g_state) {
+            case STATE_PM25: {
+                // PM2.5显示界面
+                PM25_Data pm_data = PM25_GetCurrentData();
+                if (pm_data.data_valid) {
+                    char lcd_line1[17];
+                    snprintf(lcd_line1, sizeof(lcd_line1), "PM2.5:%3.0fug/m3", pm_data.pm25_value);
+                    if (pm_data.pm25_value != 0) {
+                        LCD_Clear();
+                        LCD_PrintString(1, 0, lcd_line1);
+                    }
+					else{
+                        LCD_Clear();
+                        LCD_PrintString(1, 0, "Put on PM2.5");
+					}
+                    pm_data.data_valid = 0;
+                } else {
+                    LCD_PrintString(PM25_VAL_ROW, PM25_VAL_COL + 1, "err");
+                }
+				
+                // 显示土壤湿度状态
+                if (SoilHumidity_Read() == Bit_SET) {
+                    LCD_PrintString(2, 0, "Dry"); // 土壤干燥
+                } else {
+                    LCD_PrintString(2, 0, "Wet"); // 土壤湿润
+                }
+                break;
+            }
+
+            case STATE_THRESHOLD: {
+                // 阈值设置界面
+                LCD_PrintString(1, 0, "Tem:  C");
+                sprintf(display_str, "%2d", g_temp_thres);
+                LCD_PrintString(1, 5, display_str);
+
+                LCD_PrintString(1, 8, " Hum:  %");
+                sprintf(display_str, "%2d", g_humi_thres);
+                LCD_PrintString(1, 13, display_str);
+
+                LCD_PrintString(2, 0, "Noi:  dB");
+                sprintf(display_str, "%2d", g_noise_thres);
+                LCD_PrintString(2, 5, display_str);
+
+				// 显示选中箭头
+				if (g_select == SEL_TEMP) {
+					LCD_ClearChar(2, 9);
+					LCD_PrintChar(1, 8, '<');  // 温度选中，箭头在 (1, 8)
+				} else if (g_select == SEL_HUMI) {
+					LCD_ClearChar(1, 8);
+					LCD_PrintChar(1, 16, '<'); // 湿度选中，箭头在 (1, 16)
+				} else if (g_select == SEL_NOISE) {
+					LCD_ClearChar(1, 16);
+					LCD_PrintChar(2, 9, '<');   // 噪声选中，箭头在 (2, 9)
+					
+				}
+                break;
+            }
+
+            case STATE_REALTIME: {
+                // 实时数据显示界面
+                if (DHT_Get_Temp_Humi_Data(dht_buffer)) {
+                    LCD_PrintString(1, 0, "T:    C");
+                    LCD_PrintString(1, 10, "H:    %");
+                    LCD_PrintString(2, 0, "Noi:    dB");
+
+                    temperature = dht_buffer[2] + dht_buffer[3] * 0.1;
+                    humidity = dht_buffer[0] + dht_buffer[1] * 0.1;
+
+                    // 更新温度数值
+                    sprintf(display_str, "%4.1f", temperature);
+                    LCD_PrintString(TEMP_VAL_ROW, TEMP_VAL_COL, display_str);
+
+                    // 更新湿度数值
+                    sprintf(display_str, "%3.1f", humidity);
+                    LCD_PrintString(HUMI_VAL_ROW, HUMI_VAL_COL, display_str);
+                } else {
+                    LCD_PrintString(TEMP_VAL_ROW, TEMP_VAL_COL, "ERR");
+                    LCD_PrintString(HUMI_VAL_ROW, HUMI_VAL_COL, "ERR");
+                }
+
+                // 显示噪声数据
+                noise_adc = LM2904_ReadValue();
+                sprintf(display_str, "%3d", noise_adc);
+                LCD_PrintString(NOISE_STR_ROW, 5, display_str);
+                break;
+            }
+        }
+
+        delay_ms(200);  // 刷新周期
     }
 }

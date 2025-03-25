@@ -26,5 +26,5 @@ void LCD_PrintString(uint8_t x,uint8_t y, char *str);
 void LCD_PrintChar(uint8_t x,uint8_t y, char Char);
 void LCD_PrintData(uint8_t x,uint8_t y, uint8_t Char);
 void LCD_Clear(void);
-
+void LCD_ClearChar(uint8_t x, uint8_t y);
 #endif

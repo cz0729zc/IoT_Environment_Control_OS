@@ -35,3 +35,5 @@
 .\objects\main.o: .\Hardware\delay.h
 .\objects\main.o: .\Hardware\LM2904.h
 .\objects\main.o: .\Hardware\PM25.h
+.\objects\main.o: .\Hardware\keys.h
+.\objects\main.o: .\Hardware\LY69.h

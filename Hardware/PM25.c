@@ -71,7 +71,7 @@ void PM25_ReceiveHandler(uint8_t data) {
     static uint8_t frame_started = 0;
     
     //Serial_Printf("\r\n进入数据处理\r\n");
-    Serial_SendByte(data);
+    //Serial_SendByte(data);
 #ifdef DEBUG_PM25_PROTOCOL  // 调试模式开关
     Serial_Printf("[RAW] 0x%02X\n", data);  // 实时打印每个原始字节
 #endif

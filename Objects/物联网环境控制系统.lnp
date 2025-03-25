@@ -35,6 +35,7 @@
 ".\objects\serial.o"
 ".\objects\delay.o"
 ".\objects\pm25.o"
+".\objects\ly69.o"
 ".\objects\main.o"
 ".\objects\stm32f10x_it.o"
 --strict --scatter ".\Objects\物联网环境控制系统.sct"

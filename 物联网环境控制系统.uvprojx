@@ -755,6 +755,16 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\PM25.h</FilePath>
             </File>
+            <File>
+              <FileName>LY69.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\LY69.c</FilePath>
+            </File>
+            <File>
+              <FileName>LY69.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\LY69.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
