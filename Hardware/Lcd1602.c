@@ -2,7 +2,6 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
 
-// 精确延时函数（72MHz主频）
 static void delay_us(uint32_t us) {
     us = us * 9; // 72MHz / 8 = 9MHz
     while(us--) {

@@ -14,6 +14,7 @@
                 "D:\\Development_Tool\\Keil5\\ARM\\ARMCC\\include\\rw"
             ],
             "defines": [
+                "STM32F10X_MD",
                 "USE_STDPERIPH_DRIVER",
                 "__CC_ARM",
                 "__arm__",

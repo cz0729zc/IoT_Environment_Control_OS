@@ -8,10 +8,10 @@
 #define LCD_RS_PIN     GPIO_Pin_8
 
 #define LCD_RW_GPIO    GPIOA
-#define LCD_RW_PIN     GPIO_Pin_9
+#define LCD_RW_PIN     GPIO_Pin_11
 
 #define LCD_EN_GPIO     GPIOA
-#define LCD_EN_PIN      GPIO_Pin_10
+#define LCD_EN_PIN      GPIO_Pin_12
 
 #define LCD_DATA_GPIO  GPIOA
 #define LCD_DATA_PINS  (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | \

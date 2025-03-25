@@ -334,7 +334,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_STDPERIPH_DRIVER</Define>
+              <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
               <IncludePath>.\Start;.\Library;.\User;.\Hardware;.\System\delay;.\System\sys;.\System\usart</IncludePath>
             </VariousControls>
@@ -648,6 +648,21 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>System</GroupName>
+          <Files>
+            <File>
+              <FileName>sys.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\System\sys\sys.c</FilePath>
+            </File>
+            <File>
+              <FileName>sys.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\System\sys\sys.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>Hardware</GroupName>
           <Files>
             <File>
@@ -661,6 +676,16 @@
               <FilePath>.\Hardware\adc.h</FilePath>
             </File>
             <File>
+              <FileName>DHT11.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\DHT11.c</FilePath>
+            </File>
+            <File>
+              <FileName>DHT11.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\DHT11.h</FilePath>
+            </File>
+            <File>
               <FileName>esp8266_mqtt.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Hardware\esp8266_mqtt.c</FilePath>
@@ -669,6 +694,16 @@
               <FileName>esp8266_mqtt.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Hardware\esp8266_mqtt.h</FilePath>
+            </File>
+            <File>
+              <FileName>Keys.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\Keys.c</FilePath>
+            </File>
+            <File>
+              <FileName>Keys.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\Keys.h</FilePath>
             </File>
             <File>
               <FileName>Lcd1602.c</FileName>
@@ -690,40 +725,25 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\LM2904.h</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>System</GroupName>
-          <Files>
+            <File>
+              <FileName>Serial.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\Serial.c</FilePath>
+            </File>
+            <File>
+              <FileName>Serial.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\Serial.h</FilePath>
+            </File>
             <File>
               <FileName>delay.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\System\delay\delay.c</FilePath>
+              <FilePath>.\Hardware\delay.c</FilePath>
             </File>
             <File>
               <FileName>delay.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\System\delay\delay.h</FilePath>
-            </File>
-            <File>
-              <FileName>sys.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\System\sys\sys.c</FilePath>
-            </File>
-            <File>
-              <FileName>sys.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\System\sys\sys.h</FilePath>
-            </File>
-            <File>
-              <FileName>usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\System\usart\usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>usart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\System\usart\usart.h</FilePath>
+              <FilePath>.\Hardware\delay.h</FilePath>
             </File>
           </Files>
         </Group>
