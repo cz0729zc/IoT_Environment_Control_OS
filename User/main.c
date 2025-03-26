@@ -8,6 +8,7 @@
 #include "PM25.h"
 #include "keys.h"
 #include "LY69.h"
+#include "Beep.h"
 
 /* 系统状态定义 */
 
@@ -29,7 +30,7 @@ SystemState g_state = STATE_THRESHOLD;  // 初始状态为阈值设置
 SelectState g_select = SEL_TEMP;        // 初始选中温度
 
 /* 阈值 */
-uint8_t g_temp_thres = 30;
+uint8_t g_temp_thres = 33;
 uint8_t g_humi_thres = 80;
 uint8_t g_noise_thres = 60;
 
@@ -64,6 +65,7 @@ int main(void)
     PM25_Init();
     Key_Init();
 	SoilHumidity_Init();
+	BEEP_Init();
 	
     // 初始显示
     LCD_PrintString(1, 0, "Loading System...");
@@ -187,12 +189,21 @@ int main(void)
                     LCD_PrintString(TEMP_VAL_ROW, TEMP_VAL_COL, "ERR");
                     LCD_PrintString(HUMI_VAL_ROW, HUMI_VAL_COL, "ERR");
                 }
-
+				
+				// 温度超过阈值时打开蜂鸣器
+				if (temperature > g_temp_thres) {
+					BEEP_Alarm(1); // 打开蜂鸣器
+				} else {
+					BEEP_Alarm(0); // 关闭蜂鸣器
+				}
+			
                 // 显示噪声数据
                 noise_adc = LM2904_ReadValue();
                 sprintf(display_str, "%3d", noise_adc);
                 LCD_PrintString(NOISE_STR_ROW, 5, display_str);
                 break;
+				
+				
             }
         }
 

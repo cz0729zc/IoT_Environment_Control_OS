@@ -37,3 +37,4 @@
 .\objects\main.o: .\Hardware\PM25.h
 .\objects\main.o: .\Hardware\keys.h
 .\objects\main.o: .\Hardware\LY69.h
+.\objects\main.o: .\Hardware\Beep.h

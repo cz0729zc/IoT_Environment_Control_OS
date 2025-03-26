@@ -765,6 +765,16 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\LY69.h</FilePath>
             </File>
+            <File>
+              <FileName>Beep.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\Beep.c</FilePath>
+            </File>
+            <File>
+              <FileName>Beep.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\Beep.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
