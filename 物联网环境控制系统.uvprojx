@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Start;.\Library;.\User;.\Hardware;.\System\delay;.\System\sys;.\System\usart</IncludePath>
+              <IncludePath>.\Start;.\Library;.\User;.\Hardware;.\System\delay;.\System\sys;.\System\usart;.\HMAC\inc;.\HMAC\scr</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -663,6 +663,41 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>HMAC</GroupName>
+          <Files>
+            <File>
+              <FileName>utils_hmac.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\HMAC\inc\utils_hmac.h</FilePath>
+            </File>
+            <File>
+              <FileName>utils_md5.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\HMAC\inc\utils_md5.h</FilePath>
+            </File>
+            <File>
+              <FileName>utils_sha1.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\HMAC\inc\utils_sha1.h</FilePath>
+            </File>
+            <File>
+              <FileName>utils_hmac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\HMAC\scr\utils_hmac.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils_md5.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\HMAC\scr\utils_md5.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils_sha1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\HMAC\scr\utils_sha1.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>Hardware</GroupName>
           <Files>
             <File>
@@ -774,6 +809,56 @@
               <FileName>Beep.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Hardware\Beep.h</FilePath>
+            </File>
+            <File>
+              <FileName>mqtt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\mqtt.c</FilePath>
+            </File>
+            <File>
+              <FileName>mqtt.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\mqtt.h</FilePath>
+            </File>
+            <File>
+              <FileName>wifi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\wifi.c</FilePath>
+            </File>
+            <File>
+              <FileName>wifi.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\wifi.h</FilePath>
+            </File>
+            <File>
+              <FileName>iic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\iic.c</FilePath>
+            </File>
+            <File>
+              <FileName>iic.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\iic.h</FilePath>
+            </File>
+            <File>
+              <FileName>Serial3.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\Serial3.c</FilePath>
+            </File>
+            <File>
+              <FileName>Serial3.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\Serial3.h</FilePath>
+            </File>
+            <File>
+              <FileName>usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\usart.h</FilePath>
             </File>
           </Files>
         </Group>

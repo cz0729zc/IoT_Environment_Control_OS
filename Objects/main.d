@@ -38,3 +38,6 @@
 .\objects\main.o: .\Hardware\keys.h
 .\objects\main.o: .\Hardware\LY69.h
 .\objects\main.o: .\Hardware\Beep.h
+.\objects\main.o: .\Hardware\WiFi.h
+.\objects\main.o: .\Hardware\Serial3.h
+.\objects\main.o: .\Hardware\mqtt.h
