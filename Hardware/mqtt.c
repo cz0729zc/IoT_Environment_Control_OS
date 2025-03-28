@@ -10,6 +10,7 @@
 #include "mqtt.h"         //包含需要的头文件
 #include "string.h"       //包含需要的头文件
 #include "stdio.h"        //包含需要的头文件
+#include "Serial3.h"       //包含需要的头文件
 #include "Serial.h"       //包含需要的头文件
 #include "utils_hmac.h"   //包含需要的头文件
 #include "wifi.h"         //包含需要的头文件

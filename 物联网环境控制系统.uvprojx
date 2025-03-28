@@ -860,6 +860,46 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\usart.h</FilePath>
             </File>
+            <File>
+              <FileName>timer1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\timer1.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer1.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\timer1.h</FilePath>
+            </File>
+            <File>
+              <FileName>timer2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\timer2.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer2.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\timer2.h</FilePath>
+            </File>
+            <File>
+              <FileName>timer3.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\timer3.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer3.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\timer3.h</FilePath>
+            </File>
+            <File>
+              <FileName>timer4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\timer4.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer4.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\timer4.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

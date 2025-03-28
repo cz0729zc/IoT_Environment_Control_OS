@@ -136,25 +136,20 @@ uint8_t Serial3_GetRxData(void)
     return Serial3_RxData;
 }
 
-void USART3_IRQHandler(void)
+void Serial3_TxData(unsigned char *data)
 {
-    if(USART_GetITStatus(USART3, USART_IT_RXNE) == SET)
-    {
-        uint8_t received_data = USART_ReceiveData(USART3);
+	//Serial_Printf("进入Serial3_TxData函数");
+    int i;
+    uint16_t length = (data[0]*256+data[1]);  // 计算数据长度（高字节在前）
 
-        if(Serial3_RxCounter < SERIAL3_RXBUFF_SIZE)
-        {
-            Serial3_RxBuff[Serial3_RxCounter++] = received_data;
-        }
-		
-        //Serial_Printf("\r\n[USART3] Raw Data: 0x%02X", received_data); // 打印16进制数据
-		//Serial_Printf("\r\nSerial3_RxCounter:%d",Serial3_RxCounter);
-        USART_ClearITPendingBit(USART3, USART_IT_RXNE);
-		
-		if(Serial3_RxCounter >= SERIAL3_RXBUFF_SIZE)
-		{
-			Serial_Printf("[USART3] Buffer Overflow!\r\n");
-			Serial3_RxCounter = 0; // 重置计数器
-		}
+    // 等待发送寄存器空闲（使用TXE标志）
+    while((USART3->SR&0X40)==0);
+	
+	//Serial_Printf("空闲");
+    // 发送数据部分
+    for (i = 1; i < length; i++) {
+        Serial_Printf("发送数据：0x%x\r\n", data[i + 2]);
+        USART3->DR = data[i + 1];  // 从data[2]开始发送
+        while ((USART3->SR & 0X40) == 0);  // 等待当前字节发送完成
     }
 }

@@ -50,14 +50,14 @@ char WiFi_SendCmd(char *cmd, int timeout)
 	//Serial_Printf("\r\n 指令发送成功");
 	while(timeout--){                           //等待超时时间到0
 		delay_ms(100);                          //延时100ms
-		if(!strstr(WiFi_RX_BUF,"AT\r\nOK\r\n"))            //如果接收到OK表示指令成功
+		if(strstr(WiFi_RX_BUF,"OK"))            //如果接收到OK表示指令成功
 			break;       						//主动跳出while循环
 			
 		Serial_Printf("\r\n");
 		Serial_Printf("%d ",timeout);               //串口输出现在的超时时间
 	}
-	Serial_Printf("\r\n WiFi_RX_BUF:%s",WiFi_RX_BUF);
-	Serial_Printf("\r\n");                          //串口输出信息
+	//Serial_Printf("\r\n WiFi_RX_BUF:%s",WiFi_RX_BUF);
+	//Serial_Printf("\r\n");                          //串口输出信息
 	if(timeout<=0)return 1;                     //如果timeout<=0，说明超时时间到了，也没能收到OK，返回1
 	else return 0;		         				//反之，表示正确，说明收到OK，通过break主动跳出while
 }
@@ -92,8 +92,8 @@ char WiFi_CMD_Reset(int timeout)
   Serial_Printf("准备退出透传\r\n");  //串口显示信息
   for(i=0;i<683;i++)
   {
-    WiFi_printf("+++");                      //复位指令,突出透传
-    delay_ms(50);
+    //WiFi_printf("+++");                      //复位指令,突出透传
+    delay_ms(60);
 		
     if(WiFi_SendCmd("AT",50))//修改过,这里不合逻辑
     {
@@ -168,7 +168,8 @@ char WiFi_Connect_Server(int timeout)
 			return 2;                               //已经建立连接返回2
 		Serial_Printf("%d ",timeout);                   //串口输出现在的超时时间  
 	}
-	Serial_Printf("\r\n");                        //串口输出信息
+	//Serial_Printf("\r\n");                        //串口输出信息
+	//Serial_Printf("\r\n->连接服务器结果:%s", WiFi_RX_BUF);
 	if(timeout<=0)return 3;                   //超时错误，返回3
 	else                                      //连接成功，准备进入透传
 	{
@@ -230,55 +231,55 @@ char WiFi_WaitAP(int timeout)
 /*-------------------------------------------------*/
 char WiFi_Connect_IoTServer(void)
 {	
-    Serial_Printf("准备复位模块\r\n");                     //串口提示数据
-    if(WiFi_CMD_Reset(50)){                                //复位，100ms超时单位，总计5s超时时间
-        Serial_Printf("复位失败，准备重启\r\n");           //返回非0值，进入if，串口提示数据
-        return 1;                                      //返回1
-    }else Serial_Printf("复位成功\r\n");                   //串口提示数据
+//    Serial_Printf("准备复位模块\r\n");                     //串口提示数据
+//    if(WiFi_CMD_Reset(50)){                                //复位，100ms超时单位，总计5s超时时间
+//        Serial_Printf("复位失败，准备重启\r\n");           //返回非0值，进入if，串口提示数据
+//        return 1;                                      //返回1
+//    }else Serial_Printf("复位成功\r\n");                   //串口提示数据
 
-    Serial_Printf("准备设置STA模式\r\n");                  //串口提示数据
-    if(WiFi_SendCmd("AT+CWMODE=1",50)){                //设置STA模式，100ms超时单位，总计5s超时时间
-        Serial_Printf("设置STA模式失败，准备重启\r\n");    //返回非0值，进入if，串口提示数据
-        return 2;                                      //返回2
-    }else Serial_Printf("设置STA模式成功\r\n");            //串口提示数据
-    
-    if(wifi_mode==0){                                      //如果联网模式=0：SSID和密码写在程序里 
-        Serial_Printf("准备取消自动连接\r\n");                 //串口提示数据
-        if(WiFi_SendCmd("AT+CWAUTOCONN=0",50)){            //取消自动连接，100ms超时单位，总计5s超时时间
-            Serial_Printf("取消自动连接失败，准备重启\r\n");   //返回非0值，进入if，串口提示数据
-            return 3;                                      //返回3
-        }else Serial_Printf("取消自动连接成功\r\n");           //串口提示数据
-                
-        Serial_Printf("准备连接路由器\r\n");                   //串口提示数据	
-        if(WiFi_JoinAP(30)){                               //连接路由器,1s超时单位，总计30s超时时间
-            Serial_Printf("连接路由器失败，准备重启\r\n");     //返回非0值，进入if，串口提示数据
-            return 4;                                      //返回4	
-        }else Serial_Printf("连接路由器成功\r\n");             //串口提示数据			
-    }else{                                                 //如果联网模式=1：Smartconfig方式
-        Serial_Printf("准备设置自动连接\r\n");                 
-        if(WiFi_SendCmd("AT+CWAUTOCONN=1",50)){            //设置自动连接
-            Serial_Printf("设置自动连接失败，准备重启\r\n");
-            return 3;                                      
-        }else Serial_Printf("设置自动连接成功\r\n");           
-        
-        Serial_Printf("准备开启Smartconfig\r\n");              
-        if(WiFi_SendCmd("AT+CWSTARTSMART",50)){            //开启Smartconfig
-            Serial_Printf("开启Smartconfig失败，准备重启\r\n");
-            return 4;                                      
-        }else Serial_Printf("开启Smartconfig成功\r\n");       
+//    Serial_Printf("准备设置STA模式\r\n");                  //串口提示数据
+//    if(WiFi_SendCmd("AT+CWMODE=1",50)){                //设置STA模式，100ms超时单位，总计5s超时时间
+//        Serial_Printf("设置STA模式失败，准备重启\r\n");    //返回非0值，进入if，串口提示数据
+//        return 2;                                      //返回2
+//    }else Serial_Printf("设置STA模式成功\r\n");            //串口提示数据
+//    
+//    if(wifi_mode==0){                                      //如果联网模式=0：SSID和密码写在程序里 
+//        Serial_Printf("准备取消自动连接\r\n");                 //串口提示数据
+//        if(WiFi_SendCmd("AT+CWAUTOCONN=0",50)){            //取消自动连接，100ms超时单位，总计5s超时时间
+//            Serial_Printf("取消自动连接失败，准备重启\r\n");   //返回非0值，进入if，串口提示数据
+//            return 3;                                      //返回3
+//        }else Serial_Printf("取消自动连接成功\r\n");           //串口提示数据
+//                
+//        Serial_Printf("准备连接路由器\r\n");                   //串口提示数据	
+//        if(WiFi_JoinAP(30)){                               //连接路由器,1s超时单位，总计30s超时时间
+//            Serial_Printf("连接路由器失败，准备重启\r\n");     //返回非0值，进入if，串口提示数据
+//            return 4;                                      //返回4	
+//        }else Serial_Printf("连接路由器成功\r\n");             //串口提示数据			
+//    }else{                                                 //如果联网模式=1：Smartconfig方式
+//        Serial_Printf("准备设置自动连接\r\n");                 
+//        if(WiFi_SendCmd("AT+CWAUTOCONN=1",50)){            //设置自动连接
+//            Serial_Printf("设置自动连接失败，准备重启\r\n");
+//            return 3;                                      
+//        }else Serial_Printf("设置自动连接成功\r\n");           
+//        
+//        Serial_Printf("准备开启Smartconfig\r\n");              
+//        if(WiFi_SendCmd("AT+CWSTARTSMART",50)){            //开启Smartconfig
+//            Serial_Printf("开启Smartconfig失败，准备重启\r\n");
+//            return 4;                                      
+//        }else Serial_Printf("开启Smartconfig成功\r\n");       
 
-        Serial_Printf("请使用APP软件传输密码\r\n");            
-        if(WiFi_Smartconfig(60)){                          //APP传输密码
-            Serial_Printf("传输密码失败，准备重启\r\n");       
-            return 5;                                      
-        }else Serial_Printf("传输密码成功\r\n");               
+//        Serial_Printf("请使用APP软件传输密码\r\n");            
+//        if(WiFi_Smartconfig(60)){                          //APP传输密码
+//            Serial_Printf("传输密码失败，准备重启\r\n");       
+//            return 5;                                      
+//        }else Serial_Printf("传输密码成功\r\n");               
 
-        Serial_Printf("准备关闭Smartconfig\r\n");              
-        if(WiFi_SendCmd("AT+CWSTOPSMART",50)){             //关闭Smartconfig
-            Serial_Printf("关闭Smartconfig失败，准备重启\r\n");
-            return 6;                                      
-        }else Serial_Printf("关闭Smartconfig成功\r\n");        
-    }
+//        Serial_Printf("准备关闭Smartconfig\r\n");              
+//        if(WiFi_SendCmd("AT+CWSTOPSMART",50)){             //关闭Smartconfig
+//            Serial_Printf("关闭Smartconfig失败，准备重启\r\n");
+//            return 6;                                      
+//        }else Serial_Printf("关闭Smartconfig成功\r\n");        
+//    }
     
     Serial_Printf("准备设置透传\r\n");                     
     if(WiFi_SendCmd("AT+CIPMODE=1",50)){               //设置透传

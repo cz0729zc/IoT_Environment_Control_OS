@@ -41,3 +41,7 @@
 .\objects\main.o: .\Hardware\WiFi.h
 .\objects\main.o: .\Hardware\Serial3.h
 .\objects\main.o: .\Hardware\mqtt.h
+.\objects\main.o: .\Hardware\timer1.h
+.\objects\main.o: .\Hardware\timer4.h
+.\objects\main.o: .\Hardware\timer2.h
+.\objects\main.o: .\Hardware\timer3.h

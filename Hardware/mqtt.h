@@ -14,15 +14,16 @@
 #define  T_NUM               8     //发送缓冲区个数  
 #define  C_NUM               8     //命令缓冲区个数
 
-#define  MQTT_TxData(x)       u2_TxData(x)                                  //串口2负责800C的数据发送
+#define  MQTT_TxData(x)       Serial3_TxData(x)                                  //串口2负责800C的数据发送
 
 #define  PRODUCTKEY           "a1C7DUzkyao"//"a1deIFdMzPZ"//"a1gWV3gfYBE"                                 //产品ID
 #define  PRODUCTKEY_LEN       strlen(PRODUCTKEY)                            //产品ID长度
 #define  DEVICENAME           "MyDevice"//"My_IOTDevice"//"PID-Heater"                                        //设备名  
 #define  DEVICENAME_LEN       strlen(DEVICENAME)                            //设备名长度
-#define  DEVICESECRE          "7QDwKRhaY5X9a3dL"//"1438882988cb688d0b923f9e6fa3f58a"//"61126387fdd4864b308ad48524782b97"            //设备秘钥   
+#define  DEVICESECRE          "009eff7213b433f09b356d1d1bdc665d"//"1438882988cb688d0b923f9e6fa3f58a"//"61126387fdd4864b308ad48524782b97"            //设备秘钥   
 #define  DEVICESECRE_LEN      strlen(DEVICESECRE)                           //设备秘钥长度
 #define  S_TOPIC_NAME         "/sys/a1C7DUzkyao/MyDevice/thing/service/property/set"   //需要订阅的主题  
+
 #define  P_TOPIC_NAME         "/sys/a1C7DUzkyao/MyDevice/thing/event/property/post"    //需要发布的主题     
 
 extern unsigned char  MQTT_RxDataBuf[R_NUM][BUFF_UNIT];        //外部变量声明，数据的接收缓冲区,所有服务器发来的数据，存放在该缓冲区,缓冲区第一个字节存放数据长度

@@ -31,8 +31,8 @@
 .\objects\mqtt.o: Hardware\mqtt.h
 .\objects\mqtt.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\string.h
 .\objects\mqtt.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\mqtt.o: Hardware\Serial3.h
 .\objects\mqtt.o: Hardware\Serial.h
 .\objects\mqtt.o: .\HMAC\inc\utils_hmac.h
 .\objects\mqtt.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\mqtt.o: Hardware\wifi.h
-.\objects\mqtt.o: Hardware\Serial3.h

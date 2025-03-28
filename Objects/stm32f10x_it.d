@@ -29,3 +29,7 @@
 .\objects\stm32f10x_it.o: .\Library\stm32f10x_usart.h
 .\objects\stm32f10x_it.o: .\Library\stm32f10x_wwdg.h
 .\objects\stm32f10x_it.o: .\Library\misc.h
+.\objects\stm32f10x_it.o: .\Hardware\mqtt.h
+.\objects\stm32f10x_it.o: .\Hardware\Serial3.h
+.\objects\stm32f10x_it.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\stm32f10x_it.o: .\Hardware\Serial.h
