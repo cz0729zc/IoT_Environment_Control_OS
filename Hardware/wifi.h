@@ -9,14 +9,13 @@
 #ifndef __WIFI_H
 #define __WIFI_H
 
-#include "Serial3.h"	    //包含需要的头文件
+#include "usart3.h"	    //包含需要的头文件
+#define RESET_IO(x)    GPIO_WriteBit(GPIOB, GPIO_Pin_7, (BitAction)x)  //PB7控制WiFi的复位
 
-#define RESET_IO(x)    GPIO_WriteBit(GPIOB, GPIO_Pin_7, (BitAction)x)  //PA4控制WiFi的复位
-
-#define WiFi_printf       Serial3_Printf      // 串口3控制 WiFi
-#define WiFi_RxCounter    Serial3_RxCounter   // 串口3控制 WiFi
-#define WiFi_RX_BUF       Serial3_RxBuff      // 串口3控制 WiFi
-#define WiFi_RXBUFF_SIZE  SERIAL3_RXBUFF_SIZE // 串口3控制 WiFi
+#define WiFi_printf       u3_printf           //串口2控制 WiFi
+#define WiFi_RxCounter    Usart3_RxCounter    //串口2控制 WiFi
+#define WiFi_RX_BUF       Usart3_RxBuff       //串口2控制 WiFi
+#define WiFi_RXBUFF_SIZE  USART3_RXBUFF_SIZE  //串口2控制 WiFi
 
 //////////////////////#define SSID   "e-Lab_2.4G"   //"iQOO 5"//                  //路由器SSID名称
 //////////////////////#define PASS   "dw199194"                 //路由器密码

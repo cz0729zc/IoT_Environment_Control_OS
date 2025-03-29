@@ -841,16 +841,6 @@
               <FilePath>.\Hardware\iic.h</FilePath>
             </File>
             <File>
-              <FileName>Serial3.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Hardware\Serial3.c</FilePath>
-            </File>
-            <File>
-              <FileName>Serial3.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Hardware\Serial3.h</FilePath>
-            </File>
-            <File>
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Hardware\usart.c</FilePath>
@@ -899,6 +889,26 @@
               <FileName>timer4.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Hardware\timer4.h</FilePath>
+            </File>
+            <File>
+              <FileName>usart2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\usart2.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart2.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\usart2.h</FilePath>
+            </File>
+            <File>
+              <FileName>usart3.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\usart3.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart3.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\usart3.h</FilePath>
             </File>
           </Files>
         </Group>

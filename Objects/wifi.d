@@ -29,11 +29,12 @@
 .\objects\wifi.o: .\Library\stm32f10x_wwdg.h
 .\objects\wifi.o: .\Library\misc.h
 .\objects\wifi.o: Hardware\wifi.h
-.\objects\wifi.o: Hardware\Serial3.h
+.\objects\wifi.o: Hardware\usart3.h
 .\objects\wifi.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\wifi.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
+.\objects\wifi.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\string.h
 .\objects\wifi.o: Hardware\iic.h
 .\objects\wifi.o: Hardware\24c02.h
 .\objects\wifi.o: Hardware\delay.h
 .\objects\wifi.o: Hardware\Serial.h
 .\objects\wifi.o: Hardware\mqtt.h
-.\objects\wifi.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\String.h

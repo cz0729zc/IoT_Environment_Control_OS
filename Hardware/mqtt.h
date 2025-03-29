@@ -14,7 +14,7 @@
 #define  T_NUM               8     //发送缓冲区个数  
 #define  C_NUM               8     //命令缓冲区个数
 
-#define  MQTT_TxData(x)       Serial3_TxData(x)                                  //串口2负责800C的数据发送
+#define  MQTT_TxData(x)       u3_TxData(x)                                  //串口2负责800C的数据发送
 
 #define  PRODUCTKEY           "a1C7DUzkyao"//"a1deIFdMzPZ"//"a1gWV3gfYBE"                                 //产品ID
 #define  PRODUCTKEY_LEN       strlen(PRODUCTKEY)                            //产品ID长度

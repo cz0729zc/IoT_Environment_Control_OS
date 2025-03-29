@@ -39,7 +39,9 @@
 .\objects\main.o: .\Hardware\LY69.h
 .\objects\main.o: .\Hardware\Beep.h
 .\objects\main.o: .\Hardware\WiFi.h
-.\objects\main.o: .\Hardware\Serial3.h
+.\objects\main.o: .\Hardware\usart3.h
+.\objects\main.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
+.\objects\main.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\string.h
 .\objects\main.o: .\Hardware\mqtt.h
 .\objects\main.o: .\Hardware\timer1.h
 .\objects\main.o: .\Hardware\timer4.h

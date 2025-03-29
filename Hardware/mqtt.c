@@ -10,7 +10,7 @@
 #include "mqtt.h"         //包含需要的头文件
 #include "string.h"       //包含需要的头文件
 #include "stdio.h"        //包含需要的头文件
-#include "Serial3.h"       //包含需要的头文件
+#include "usart3.h"       //包含需要的头文件
 #include "Serial.h"       //包含需要的头文件
 #include "utils_hmac.h"   //包含需要的头文件
 #include "wifi.h"         //包含需要的头文件
@@ -117,20 +117,20 @@ void AliIoT_Parameter_Init(void)
 {	
 	char temp[128];                                                       //计算加密的时候，临时使用的缓冲区
 
-	memset(ClientID,128,0);                                               //客户端ID的缓冲区全部清零
+	memset(ClientID,0,128);                                               //客户端ID的缓冲区全部清零
 	sprintf(ClientID,"%s|securemode=3,signmethod=hmacsha1|",DEVICENAME);  //构建客户端ID，并存入缓冲区
 	ClientID_len = strlen(ClientID);                                      //计算客户端ID的长度
 	
-	memset(Username,128,0);                                               //用户名的缓冲区全部清零
+	memset(Username,0,128);                                               //用户名的缓冲区全部清零
 	sprintf(Username,"%s&%s",DEVICENAME,PRODUCTKEY);                      //构建用户名，并存入缓冲区
 	Username_len = strlen(Username);                                      //计算用户名的长度
 	
-	memset(temp,128,0);                                                                      //临时缓冲区全部清零
+	memset(temp,0,128);                                                                      //临时缓冲区全部清零
 	sprintf(temp,"clientId%sdeviceName%sproductKey%s",DEVICENAME,DEVICENAME,PRODUCTKEY);     //构建加密时的明文   
 	utils_hmac_sha1(temp,strlen(temp),Passward,DEVICESECRE,DEVICESECRE_LEN);                 //以DeviceSecret为秘钥对temp中的明文，进行hmacsha1加密，结果就是密码，并保存到缓冲区中
 	Passward_len = strlen(Passward);                                                         //计算用户名的长度
 	
-	memset(ServerIP,128,0);  
+	memset(ServerIP,0,128);  
 	sprintf(ServerIP,"%s.iot-as-mqtt.cn-shanghai.aliyuncs.com",PRODUCTKEY);                  //构建服务器域名
 	ServerPort = 1883;                                                                       //服务器端口号1883
 	

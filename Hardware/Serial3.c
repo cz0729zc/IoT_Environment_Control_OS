@@ -138,18 +138,10 @@ uint8_t Serial3_GetRxData(void)
 
 void Serial3_TxData(unsigned char *data)
 {
-	//Serial_Printf("进入Serial3_TxData函数");
-    int i;
-    uint16_t length = (data[0]*256+data[1]);  // 计算数据长度（高字节在前）
-
-    // 等待发送寄存器空闲（使用TXE标志）
-    while((USART3->SR&0X40)==0);
-	
-	//Serial_Printf("空闲");
-    // 发送数据部分
-    for (i = 1; i < length; i++) {
-        Serial_Printf("发送数据：0x%x\r\n", data[i + 2]);
-        USART3->DR = data[i + 1];  // 从data[2]开始发送
-        while ((USART3->SR & 0X40) == 0);  // 等待当前字节发送完成
-    }
+	int	i;	
+	while((USART3->SR&0X40)==0);
+	for(i = 1;i <= (data[0]*256+data[1]);i ++){			
+		USART3->DR = data[i+1];
+		while((USART3->SR&0X40)==0);	
+	}
 }

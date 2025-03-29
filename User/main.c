@@ -72,7 +72,9 @@ int main(void)
     LCD_Init();
     LM2904_Init();
     Serial_Init();
-    Serial3_Init();
+    Usart3_Init(115200);
+    //USART_Init(USART3,115200);
+    
     Key_Init();
     SoilHumidity_Init();
     BEEP_Init();

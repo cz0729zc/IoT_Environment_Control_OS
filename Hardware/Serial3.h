@@ -19,4 +19,5 @@ uint8_t Serial3_GetRxData(void);
 extern uint8_t Serial3_RxBuff[SERIAL3_RXBUFF_SIZE];  // 声明外部缓冲区
 extern uint16_t Serial3_RxCounter;                   // 声明接收计数器
 
+
 #endif
