@@ -881,14 +881,14 @@
               <FilePath>.\Hardware\timer3.h</FilePath>
             </File>
             <File>
-              <FileName>timer4.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Hardware\timer4.c</FilePath>
-            </File>
-            <File>
               <FileName>timer4.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Hardware\timer4.h</FilePath>
+            </File>
+            <File>
+              <FileName>timer4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\timer4.c</FilePath>
             </File>
             <File>
               <FileName>usart2.c</FileName>
@@ -934,6 +934,11 @@
               <FileName>stm32f10x_it.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\User\stm32f10x_it.h</FilePath>
+            </File>
+            <File>
+              <FileName>main.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\User\main.h</FilePath>
             </File>
           </Files>
         </Group>

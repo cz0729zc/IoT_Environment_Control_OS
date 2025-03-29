@@ -30,6 +30,7 @@
 #include "usart3.h"
 #include "timer3.h"
 #include "timer4.h"
+#include "main.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -98,6 +99,12 @@ void USART3_IRQHandler(void)
 	}
 }
 
+
+extern u8 Second;
+extern u8 Minute;
+extern u8 Hour;
+extern u8 Upload_TimeOK;
+
 /*-------------------------------------------------*/
 /*函数名：定时器4中断服务函数  USART3           */
 /*参  数：无                                       */
@@ -117,7 +124,10 @@ void TIM4_IRQHandler(void)
 		TIM_SetCounter(TIM3, 0);                                      //清零定时器6计数器，重新计时ping包发送时间
 		TIM_Cmd(TIM4, DISABLE);                        				  //关闭TIM4定时器
 		TIM_SetCounter(TIM4, 0);                        			  //清零定时器4计数器
-		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);     			  //清除TIM4溢出中断标志 	
+		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);     			  //清除TIM4溢出中断标志 
+
+        TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+        Upload_TimeOK = 1;  // 设置数据上传标志		
 	}
 }
 ///*-------------------------------------------------*/
