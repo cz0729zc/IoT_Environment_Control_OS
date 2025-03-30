@@ -104,6 +104,7 @@ void PM25_ReceiveHandler(uint8_t data) {
 
 // 获取当前数据
 PM25_Data PM25_GetCurrentData(void) {
+	//Serial_Printf("获取当前PM2.5数据");
     return current_data;
 }
 

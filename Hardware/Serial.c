@@ -122,14 +122,3 @@ uint8_t Serial_GetRxData(void)
 	return Serial_RxData;
 }
 
-void USART1_IRQHandler(void) {
-    if(USART_GetITStatus(USART1, USART_IT_RXNE) == SET) {
-		//Serial_SendString("\r\n 进入串口中断");
-        uint8_t data = USART_ReceiveData(USART1);
-        PM25_ReceiveHandler(data);  // PM2.5数据处理调用
-		//Serial_SendByte(data);
-        Serial_RxData = data;
-        Serial_RxFlag = 1;
-        USART_ClearITPendingBit(USART1, USART_IT_RXNE);
-    }
-}

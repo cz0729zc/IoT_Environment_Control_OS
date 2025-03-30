@@ -40,3 +40,4 @@
 .\objects\stm32f10x_it.o: .\Hardware\timer3.h
 .\objects\stm32f10x_it.o: .\Hardware\timer4.h
 .\objects\stm32f10x_it.o: User\main.h
+.\objects\stm32f10x_it.o: .\Hardware\PM25.h

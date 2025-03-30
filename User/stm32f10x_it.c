@@ -31,6 +31,7 @@
 #include "timer3.h"
 #include "timer4.h"
 #include "main.h"
+#include "PM25.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -47,6 +48,22 @@
 /*            Cortex-M3 Processor Exceptions Handlers                         */
 /******************************************************************************/
 
+/*-------------------------------------------------*/
+/*函数名：串口1接收中断函数                        */
+/*参  数：无                                       */
+/*返回值：无                                       */
+/*-------------------------------------------------*/
+void USART1_IRQHandler(void) {
+    if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
+		//Serial_Printf("\r\n 进入串口中断");
+        uint8_t data = USART_ReceiveData(USART1);
+        PM25_ReceiveHandler(data);  // PM2.5数据处理调用
+		//Serial_SendByte(data);
+        Serial_RxData = data;
+        Serial_RxFlag = 1;
+        USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+    }
+}
 
 /*-------------------------------------------------*/
 /*函数名：串口2接收中断函数                        */

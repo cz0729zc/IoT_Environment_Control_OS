@@ -18,8 +18,8 @@
 
 /* 系统状态定义 */
 typedef enum {
-    STATE_THRESHOLD = 0,    // 阈值设置界面
-    STATE_PM25,              // PM2.5显示界面
+    STATE_PM25 = 0,    // PM2.5显示界面
+    STATE_THRESHOLD,              // 阈值设置界面
     STATE_REALTIME           // 实时数据显示界面
 } SystemState;
 
@@ -31,7 +31,7 @@ typedef enum {
 } SelectState;
 
 /* 全局变量 */
-SystemState g_state = STATE_THRESHOLD;  // 初始状态为阈值设置
+SystemState g_state = STATE_REALTIME;  // 初始状态为阈值设置
 SelectState g_select = SEL_TEMP;        // 初始选中温度
 
 // 在全局变量区添加
@@ -43,7 +43,7 @@ float g_pm25;
 /* 阈值 */
 uint8_t g_temp_thres = 33;
 uint8_t g_humi_thres = 80;
-uint8_t g_noise_thres = 60;
+float g_pm25_thres = 60.00;
 
 uint8_t Second = 0;
 uint8_t Minute = 0;
@@ -85,7 +85,7 @@ void Upload_Sensor_Data() {
             "\"CurrentTemperature\":%.1f,"
             "\"CurrentHumidity\":%.1f,"
             "\"CurrentNosie\":%d,"
-            "\"CurrentPM25\":%.0f,"
+            "\"CurrentPM25\":%.2f,"
             "\"SoilHumidity\":%d,"
             "\"OpenBEEP\":%d"
         "},"
@@ -288,7 +288,7 @@ int main(void)
                     switch (g_select) {
                         case SEL_TEMP: g_temp_thres++; break;
                         case SEL_HUMI: g_humi_thres++; break;
-                        case SEL_NOISE: g_noise_thres++; break;
+                        case SEL_NOISE: g_pm25_thres++; break;
                     }
                 }
                 break;
@@ -298,7 +298,7 @@ int main(void)
                     switch (g_select) {
                         case SEL_TEMP: g_temp_thres--; break;
                         case SEL_HUMI: g_humi_thres--; break;
-                        case SEL_NOISE: g_noise_thres--; break;
+                        case SEL_NOISE: g_pm25_thres--; break;
                     }
                 }
                 break;
@@ -307,12 +307,15 @@ int main(void)
         // 根据状态显示不同内容
         switch (g_state) {
             case STATE_PM25: {
+				//Serial_Printf("进入PM2.5显示界面");
                 // PM2.5显示界面
                 PM25_Data pm_data = PM25_GetCurrentData();
+				
                 if (pm_data.data_valid) {
                     char lcd_line1[17];
-                    snprintf(lcd_line1, sizeof(lcd_line1), "PM2.5:%3.0fug/m3", pm_data.pm25_value);
+                    snprintf(lcd_line1, sizeof(lcd_line1), "PM2.5:%4.2fug/m3", pm_data.pm25_value);
 					g_pm25 = pm_data.pm25_value;
+					
                     if (pm_data.pm25_value != 0) {
                         LCD_Clear();
                         LCD_PrintString(1, 0, lcd_line1);
@@ -322,15 +325,25 @@ int main(void)
                         LCD_PrintString(1, 0, "Put on PM2.5");
 					}
                     pm_data.data_valid = 0;
+					
+					// PM2.5超过阈值时打开蜂鸣器
+					if (g_pm25 > g_pm25_thres) {
+						BEEP_Alarm(1); // 打开蜂鸣器
+						delay_ms(1000);
+						BEEP_Alarm(0);
+						break;
+					} else {
+						BEEP_Alarm(0); // 关闭蜂鸣器
+					}
                 } else {
-                    LCD_PrintString(PM25_VAL_ROW, PM25_VAL_COL + 1, "err");
+                    LCD_PrintString(PM25_VAL_ROW, 0, "PM2.5:ERR");
                 }
 				
                 // 显示土壤湿度状态
                 if (SoilHumidity_Read() == Bit_SET) {
-                    LCD_PrintString(2, 0, "Dry"); // 土壤干燥
+                    LCD_PrintString(2, 0, "SoilHumi:Dry"); // 土壤干燥
                 } else {
-                    LCD_PrintString(2, 0, "Wet"); // 土壤湿润
+                    LCD_PrintString(2, 0, "SoilHumi:Wet"); // 土壤湿润
                 }
                 break;
             }
@@ -345,9 +358,9 @@ int main(void)
                 sprintf(display_str, "%2d", g_humi_thres);
                 LCD_PrintString(1, 13, display_str);
 
-                LCD_PrintString(2, 0, "Noi:  dB");
-                sprintf(display_str, "%2d", g_noise_thres);
-                LCD_PrintString(2, 5, display_str);
+                LCD_PrintString(2, 0, "PM2.5:    ug/m3");
+                sprintf(display_str, "%4.1f", g_pm25_thres);
+                LCD_PrintString(2, 7, display_str);
 
 				// 显示选中箭头
 				if (g_select == SEL_TEMP) {
@@ -358,7 +371,7 @@ int main(void)
 					LCD_PrintChar(1, 16, '<'); // 湿度选中，箭头在 (1, 16)
 				} else if (g_select == SEL_NOISE) {
 					LCD_ClearChar(1, 16);
-					LCD_PrintChar(2, 9, '<');   // 噪声选中，箭头在 (2, 9)
+					LCD_PrintChar(2, 16, '<');   // 噪声选中，箭头在 (2, 9)
 					
 				}
                 break;
@@ -366,6 +379,7 @@ int main(void)
 
             case STATE_REALTIME: {
                 // 实时数据显示界面
+				
                 if (DHT_Get_Temp_Humi_Data(dht_buffer)) {
                     LCD_PrintString(1, 0, "T:    C");
                     LCD_PrintString(1, 10, "H:    %");
@@ -388,13 +402,7 @@ int main(void)
                     LCD_PrintString(TEMP_VAL_ROW, TEMP_VAL_COL, "ERR");
                     LCD_PrintString(HUMI_VAL_ROW, HUMI_VAL_COL, "ERR");
                 }
-				
-				// 温度超过阈值时打开蜂鸣器
-				if (temperature > g_temp_thres) {
-					BEEP_Alarm(1); // 打开蜂鸣器
-				} else {
-					BEEP_Alarm(0); // 关闭蜂鸣器
-				}
+			
 			
                 // 显示噪声数据
                 noise_adc = ConvertToDecibel(LM2904_ReadValue());			
@@ -402,6 +410,7 @@ int main(void)
 				g_noise = noise_adc;
                 sprintf(display_str, "%3d", noise_adc);
                 LCD_PrintString(NOISE_STR_ROW, 7, display_str);
+				
                 break;
 				
 				

@@ -1,4 +1,5 @@
 #include "beep.h"
+#include "delay.h"
 
 // ³õÊ¼»¯·äÃùÆ÷
 void BEEP_Init(void) {
