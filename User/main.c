@@ -137,7 +137,11 @@ int main(void)
     } else {
         Serial_Printf("\r\n->模块无响应！");
         LCD_PrintString(2, 0, "AT FAIL");
+		delay_ms(500);
+		LCD_PrintString(2, 0, "Please RST");
+		while(!(WiFi_SendCmd("AT", 20) == 0));
     }
+
     delay_ms(500);
     LCD_Clear();
     
@@ -160,23 +164,9 @@ int main(void)
     delay_ms(500);
     LCD_Clear();
 
-    while (1) {
-        delay_ms(200);
-        TIM3_ENABLE_30S();
-		
-		
-        // Serial_Printf("发送out值： MQTT_TxDataOutPtr :%d\r\n",MQTT_TxDataOutPtr);
-        // Serial_Printf("发送in值：  MQTT_TxDataInPtr  :%d\r\n\r\n",MQTT_TxDataInPtr);
-        // Serial_Printf("接收out值： MQTT_RxDataOutPtr :%d\r\n",MQTT_RxDataOutPtr);
-        // Serial_Printf("接收in值：  MQTT_RxDataInPtr  :%d\r\n",MQTT_RxDataInPtr);
-       
-        //Serial_Printf("接收值：  MQTT_RxDataOutPtr[2]  :%d\r\n\r\n",MQTT_RxDataOutPtr[2]);
-        if(Connect_flag == 1) {  
-			
-//			if (ConnectPack_flag == 1) {
-//				MQTT_Subscribe(S_TOPIC_NAME, 0);  // 订阅主题，QoS=0
-//				Serial_Printf("已订阅主题：%s\r\n", S_TOPIC_NAME);
-//			}			
+    while (1) {	
+
+        if(Connect_flag == 1) {  		
 			
             /* 处理发送缓冲区数据 */
             if(MQTT_TxDataOutPtr != MQTT_TxDataInPtr) {
@@ -379,7 +369,7 @@ int main(void)
                 if (DHT_Get_Temp_Humi_Data(dht_buffer)) {
                     LCD_PrintString(1, 0, "T:    C");
                     LCD_PrintString(1, 10, "H:    %");
-                    LCD_PrintString(2, 0, "Noi:    dB");
+                    LCD_PrintString(2, 0, "Noise:   dB");
 
                     temperature = dht_buffer[2] + dht_buffer[3] * 0.1;
                     humidity = dht_buffer[0] + dht_buffer[1] * 0.1;
@@ -407,10 +397,11 @@ int main(void)
 				}
 			
                 // 显示噪声数据
-                noise_adc = LM2904_ReadValue();
+                noise_adc = ConvertToDecibel(LM2904_ReadValue());			
+				//noise_adc = LM2904_ReadValue();
 				g_noise = noise_adc;
                 sprintf(display_str, "%3d", noise_adc);
-                LCD_PrintString(NOISE_STR_ROW, 5, display_str);
+                LCD_PrintString(NOISE_STR_ROW, 7, display_str);
                 break;
 				
 				

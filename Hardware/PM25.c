@@ -23,7 +23,7 @@ uint8_t FucCheckSum(uint8_t *buf, uint8_t len) {
 static void ParsePM25Data(uint8_t *data) {
     // 校验帧头和校验和
     if(data[0] != FRAME_HEADER) {
-        Serial_SendString("\r\n帧头错误");
+        Serial_Printf("\r\n帧头错误");
         current_data.data_valid = 0;
         return;
     }
@@ -31,7 +31,7 @@ static void ParsePM25Data(uint8_t *data) {
     // 验证校验和
     uint8_t checksum = FucCheckSum(data, DATA_LENGTH);
     if(checksum != data[CHECKSUM_POS]) {
-        Serial_SendString("\r\n校验和错误");
+        Serial_Printf("\r\n校验和错误");
         current_data.data_valid = 0;
         return;
     }

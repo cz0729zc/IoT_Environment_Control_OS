@@ -66,5 +66,6 @@ uint16_t LM2904_ReadValue(void) {
 }
 
 float ConvertToDecibel(uint16_t adc_value) {
-    return 30.0f + (adc_value - 800.0f) * 0.2f;  // 每ADC单位对应0.2dB
+	//db=输出信号/（供电电压-1.7）*100+30
+    return (float)ADC_ConvertedValue*(5.0/4096)/5.0*100; // 每ADC单位对应0.2dB
 }

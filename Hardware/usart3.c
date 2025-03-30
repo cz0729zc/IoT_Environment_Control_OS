@@ -65,7 +65,7 @@ void Usart3_Init(unsigned int bound)
 	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);          //开启接收中断
     NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;       //设置串口3中断
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0; //抢占优先级0
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority =0;		//子优先级0
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;		//子优先级0
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//中断通道使能
 	NVIC_Init(&NVIC_InitStructure);	                        //设置串口3中断
 #endif  
