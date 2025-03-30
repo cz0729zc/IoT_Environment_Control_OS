@@ -701,16 +701,6 @@
           <GroupName>Hardware</GroupName>
           <Files>
             <File>
-              <FileName>adc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Hardware\adc.c</FilePath>
-            </File>
-            <File>
-              <FileName>adc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Hardware\adc.h</FilePath>
-            </File>
-            <File>
               <FileName>DHT11.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Hardware\DHT11.c</FilePath>
@@ -719,16 +709,6 @@
               <FileName>DHT11.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Hardware\DHT11.h</FilePath>
-            </File>
-            <File>
-              <FileName>esp8266_mqtt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Hardware\esp8266_mqtt.c</FilePath>
-            </File>
-            <File>
-              <FileName>esp8266_mqtt.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Hardware\esp8266_mqtt.h</FilePath>
             </File>
             <File>
               <FileName>Keys.c</FileName>
