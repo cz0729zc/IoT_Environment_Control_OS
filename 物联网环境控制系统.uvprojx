@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Start;.\Library;.\User;.\Hardware;.\System\delay;.\System\sys;.\System\usart;.\HMAC\inc;.\HMAC\scr</IncludePath>
+              <IncludePath>.\Start;.\Library;.\User;.\Hardware;.\System\delay;.\System\sys;.\System\usart;.\HMAC\inc;.\HMAC\scr;.\Gizwits</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -644,6 +644,31 @@
               <FileName>stm32f10x_wwdg.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Library\stm32f10x_wwdg.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Gizwits</GroupName>
+          <Files>
+            <File>
+              <FileName>gizwits_product.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Gizwits\gizwits_product.c</FilePath>
+            </File>
+            <File>
+              <FileName>gizwits_product.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Gizwits\gizwits_product.h</FilePath>
+            </File>
+            <File>
+              <FileName>gizwits_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Gizwits\gizwits_protocol.c</FilePath>
+            </File>
+            <File>
+              <FileName>gizwits_protocol.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Gizwits\gizwits_protocol.h</FilePath>
             </File>
           </Files>
         </Group>
