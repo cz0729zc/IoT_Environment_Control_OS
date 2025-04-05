@@ -24,14 +24,18 @@ static void ParsePM25Data(uint8_t *data) {
     // 校验帧头和校验和
     if(data[0] != FRAME_HEADER) {
         Serial_Printf("\r\n帧头错误");
+        memset(rx_buffer, 0, DATA_LENGTH); // 清零缓冲区
+        rx_index = 0;                      // 重置接收索引
+        frame_started = 0;                 // 复位状态机
         current_data.data_valid = 0;
         return;
     }
-    
-    // 验证校验和
-    uint8_t checksum = FucCheckSum(data, DATA_LENGTH);
-    if(checksum != data[CHECKSUM_POS]) {
+    //检测校验和
+    if(FucCheckSum(data, DATA_LENGTH) != data[CHECKSUM_POS]) {
         Serial_Printf("\r\n校验和错误");
+        memset(rx_buffer, 0, DATA_LENGTH); // 清零缓冲区
+        rx_index = 0;
+        frame_started = 0;
         current_data.data_valid = 0;
         return;
     }
@@ -70,36 +74,21 @@ static void ParsePM25Data(uint8_t *data) {
 void PM25_ReceiveHandler(uint8_t data) {
     static uint8_t frame_started = 0;
     
-    //Serial_Printf("\r\n进入数据处理\r\n");
-    //Serial_SendByte(data);
-#ifdef DEBUG_PM25_PROTOCOL  // 调试模式开关
-    Serial_Printf("[RAW] 0x%02X\n", data);  // 实时打印每个原始字节
-#endif
-
     if(!frame_started) {
         if(data == FRAME_HEADER) {
-#ifdef DEBUG_PM25_PROTOCOL
-            Serial_Printf("\n--- Frame Start ---\n");
-#endif
             rx_index = 0;
-            rx_buffer[rx_index++] = data;
+            rx_buffer[rx_index++] = data; // 保留帧头
             frame_started = 1;
         }
     } else {
-        rx_buffer[rx_index++] = data;
-        
         if(rx_index >= DATA_LENGTH) {
-#ifdef DEBUG_PM25_PROTOCOL
-            Serial_Printf("Full Frame: ");
-            for(int i=0; i<DATA_LENGTH; i++){
-                Serial_Printf("%02X ", rx_buffer[i]);
-            }
-            Serial_Printf("\n");
-#endif
-            ParsePM25Data(rx_buffer);
-            frame_started = 0;
+            ParsePM25Data(rx_buffer);     // 校验失败时会自动清零
+            frame_started = 0;           // 无论成功与否都复位
+        } else {
+            rx_buffer[rx_index++] = data; // 继续填充缓冲区
         }
     }
+
 }
 
 // 获取当前数据

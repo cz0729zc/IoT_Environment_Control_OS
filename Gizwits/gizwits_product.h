@@ -20,9 +20,7 @@
 extern "C" {
 #endif
 #include <stdint.h>
-#include <stm32f10x.h>
 #include "gizwits_protocol.h"
-#include "timer.h"
 
 /**
 * MCU software version

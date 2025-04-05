@@ -120,7 +120,7 @@ uint8_t DHT_Get_Temp_Humi_Data(uint8_t buffer[])
 		buffer[2] = DHT_Get_Byte_Data();  //读取湿度的整数放入数组第三个元素
 		buffer[3] = DHT_Get_Byte_Data();  //读取温度的小数放入数组第四个元素
 		buffer[4] = DHT_Get_Byte_Data();  //读取的校验数据放入数组的第五个元素，用来检测数据是否读取正确
-		Serial_SendArray(buffer,5);	
+		//Serial_SendArray(buffer,5);	
 	}
 	return (buffer[0]+buffer[1]+buffer[2]+buffer[3] == buffer[4]) ? 1 : 0;   //校验数据是否传输正确
 }

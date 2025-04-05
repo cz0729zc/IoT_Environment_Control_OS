@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Start;.\Library;.\User;.\Hardware;.\System\delay;.\System\sys;.\System\usart;.\HMAC\inc;.\HMAC\scr;.\Gizwits</IncludePath>
+              <IncludePath>.\Start;.\Library;.\User;.\Hardware;.\System\delay;.\System\sys;.\System\usart;.\HMAC\inc;.\HMAC\scr;.\Gizwits;.\Utils</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -648,31 +648,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Gizwits</GroupName>
-          <Files>
-            <File>
-              <FileName>gizwits_product.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Gizwits\gizwits_product.c</FilePath>
-            </File>
-            <File>
-              <FileName>gizwits_product.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Gizwits\gizwits_product.h</FilePath>
-            </File>
-            <File>
-              <FileName>gizwits_protocol.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Gizwits\gizwits_protocol.c</FilePath>
-            </File>
-            <File>
-              <FileName>gizwits_protocol.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Gizwits\gizwits_protocol.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>System</GroupName>
           <Files>
             <File>
@@ -915,6 +890,16 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\usart3.h</FilePath>
             </File>
+            <File>
+              <FileName>usart1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\usart1.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart1.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\usart1.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -944,6 +929,41 @@
               <FileName>main.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\User\main.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Gizwits</GroupName>
+          <Files>
+            <File>
+              <FileName>gizwits_product.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Gizwits\gizwits_product.c</FilePath>
+            </File>
+            <File>
+              <FileName>gizwits_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Gizwits\gizwits_protocol.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Utils</GroupName>
+          <Files>
+            <File>
+              <FileName>common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Utils\common.c</FilePath>
+            </File>
+            <File>
+              <FileName>dataPointTools.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Utils\dataPointTools.c</FilePath>
+            </File>
+            <File>
+              <FileName>ringbuffer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Utils\ringbuffer.c</FilePath>
             </File>
           </Files>
         </Group>

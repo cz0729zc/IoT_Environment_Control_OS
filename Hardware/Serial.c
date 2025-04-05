@@ -7,7 +7,7 @@
 uint8_t Serial_RxData;
 uint8_t Serial_RxFlag;
 
-//引脚为PA9 TX和PA10 RX采用APB2外设USART1
+//òy???aPA9 TXoíPA10 RX2éó?APB2íaéèUSART1
 void Serial_Init(void)
 {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);

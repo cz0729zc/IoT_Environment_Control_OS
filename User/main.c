@@ -15,6 +15,10 @@
 #include "timer4.h"
 #include "timer2.h"
 #include "timer3.h"
+#include "gizwits_product.h"
+#include "gizwits_protocol.h"
+#include "common.h"
+
 
 /* 系统状态定义 */
 typedef enum {
@@ -39,6 +43,8 @@ float g_temperature;
 float g_humidity;
 uint16_t g_noise;
 float g_pm25;
+bool Soil_status;
+bool beep_status;
 
 /* 阈值 */
 uint8_t g_temp_thres = 33;
@@ -67,35 +73,7 @@ volatile uint8_t Upload_TimeOK = 0;  // 上载数据标志位
 #define PM25_VAL_COL 6
 #define COLUMN_OFFSET 9
 
-// 在MQTT发送失败时进行重试
-#define MAX_RETRY 3
-uint8_t retry_count = 0;
 
-void Upload_Sensor_Data() {
-	char payload[256];
-	
-    uint8_t soil_status = SoilHumidity_Read();
-    uint8_t beep_status = GPIO_ReadInputDataBit(BEEP_GPIO,BEEP_PIN); // 蜂鸣器状态
-    
-    // 构建JSON数据包
-    snprintf(payload, sizeof(payload),
-        "{\"method\":\"thing.event.property.post\","
-        "\"id\":\"203302322\","
-        "\"params\":{"
-            "\"CurrentTemperature\":%.1f,"
-            "\"CurrentHumidity\":%.1f,"
-            "\"CurrentNosie\":%d,"
-            "\"CurrentPM25\":%.2f,"
-            "\"SoilHumidity\":%d,"
-            "\"OpenBEEP\":%d"
-        "},"
-        "\"version\":\"1.0.0\"}",
-        g_temperature, g_humidity, g_noise, 
-        g_pm25, soil_status, beep_status);
-
-    // 发布MQTT消息
-    MQTT_PublishQs0(P_TOPIC_NAME, payload, strlen(payload));
-}
 
 int main(void)
 {
@@ -107,166 +85,37 @@ int main(void)
     // 初始化
     LCD_Init();
     LM2904_Init();
+	PM25_Init();
     Serial_Init();
-    Usart3_Init(115200);
+    Usart3_Init(9600);             //AT固件115200，机智云固件9600
     //USART_Init(USART3,115200);
     
     Key_Init();
     SoilHumidity_Init();
     BEEP_Init();
 
-    // WIFI初始化
-    WiFi_ResetIO_Init();
-    MQTT_Buff_Init();
-    AliIoT_Parameter_Init();
-
     // 定时器初始化
-    Timer1_Init(49,7200);   //10Khz的计数频率，计数到49为5ms
-    TIM4_Init(5000,7200);   //TIM4初始化，定时时间 5000 * 7200 * 1000/72000000 = 500ms
-    
+   // Timer1_Init(49,7200);   //10Khz的计数频率，计数到49为5ms
+    //TIM4_Init(5000,7200);   //TIM4初始化，定时时间 5000 * 7200 * 1000/72000000 = 500ms
+	TIM4_Init(1000-1, 72-1);  // 初始化1ms定时为机智云协议提供时基
+	TIM_Cmd(TIM4, ENABLE);    // 启动定时器
+//	
+//    // WIFI初始化
+    userInit();
+    gizwitsInit();
+	
+	delay_ms(500);
+	gizwitsSetMode(WIFI_SOFTAP_MODE);
+	//gizwitsSetMode(WIFI_AIRLINK_MODE);
+
+
     // 初始显示
     LCD_PrintString(1, 0, "Loading System...");
+	Serial_Printf("Loading System...");
     delay_ms(1000);
     LCD_Clear();
 
-    // 初始化WiFi模块
-    LCD_PrintString(1, 0, "AT Test...");
-    if (WiFi_SendCmd("AT", 20) == 0) {
-        Serial_Printf("\r\n->模块响应正常:%s", WiFi_RX_BUF);
-        LCD_PrintString(2, 0, "AT OK");
-    } else {
-        Serial_Printf("\r\n->模块无响应！");
-        LCD_PrintString(2, 0, "AT FAIL");
-		delay_ms(500);
-		LCD_PrintString(2, 0, "Please RST");
-		while(!(WiFi_SendCmd("AT", 20) == 0));
-    }
-
-    delay_ms(500);
-    LCD_Clear();
-    
-    LCD_PrintString(1, 0, "WIFI init...");
-    Serial_Printf("准备设置STA模式\r\n");
-    if(WiFi_SendCmd("AT+CWMODE=1",50)) {
-        Serial_Printf("设置STA模式失败，准备重启\r\n");
-    } else {
-        Serial_Printf("设置STA模式成功\r\n");
-    }	
-    
-    LCD_PrintString(1, 0, "WIFI Connect...");
-    if (WiFi_JoinAP(30) == 0) {
-        LCD_PrintString(2, 0, "WIFI OK");
-        Serial_Printf("连接路由器成功！");
-    } else {
-        LCD_PrintString(2, 0, "WIFI FALL");
-        Serial_Printf("连接路由器失败！");
-    }
-    delay_ms(500);
-    LCD_Clear();
-
-    while (1) {	
-
-        if(Connect_flag == 1) {  		
-			
-            /* 处理发送缓冲区数据 */
-            if(MQTT_TxDataOutPtr != MQTT_TxDataInPtr) {
-                if((MQTT_TxDataOutPtr[2]==0x10) || 
-                   ((MQTT_TxDataOutPtr[2]==0x82) && (ConnectPack_flag==1)) || 
-                   (SubcribePack_flag==1)) {    
-                    Serial_Printf("发送数据:0x%x\r\n", MQTT_TxDataOutPtr[2]);
-                    MQTT_TxData(MQTT_TxDataOutPtr);
-                    MQTT_TxDataOutPtr += BUFF_UNIT;
-                    if(MQTT_TxDataOutPtr == MQTT_TxDataEndPtr)
-                        MQTT_TxDataOutPtr = MQTT_TxDataBuf[0];
-                } 
-            }
-
-            /* 处理接收缓冲区数据 */
-            if(MQTT_RxDataOutPtr != MQTT_RxDataInPtr) {
-                Serial_Printf("接收到数据:");
-                if(MQTT_RxDataOutPtr[2] == 0x20) {             			
-                    switch(MQTT_RxDataOutPtr[5]) {					
-                        case 0x00 : 
-                            Serial_Printf("CONNECT报文成功\r\n");
-                            ConnectPack_flag = 1;
-                            break;                                              
-                        case 0x01 : 
-                            Serial_Printf("连接已拒绝，不支持的协议版本，准备重启\r\n");
-                            Connect_flag = 0;
-                            break;
-                        case 0x02 : 
-                            Serial_Printf("连接已拒绝，不合格的客户端标识符，准备重启\r\n");
-                            Connect_flag = 0;
-                            break;
-                        case 0x03 : 
-                            Serial_Printf("连接已拒绝，服务端不可用，准备重启\r\n");
-                            Connect_flag = 0;
-                            break;
-                        case 0x04 : 
-                            Serial_Printf("连接已拒绝，无效的用户名或密码，准备重启\r\n");
-                            Connect_flag = 0;
-                            break;
-                        case 0x05 : 
-                            Serial_Printf("连接已拒绝，未授权，准备重启\r\n");
-                            Connect_flag = 0;
-                            break;		
-                        default   : 
-                            Serial_Printf("连接已拒绝，未知状态，准备重启\r\n");
-                            Connect_flag = 0;
-                            break;								
-                    }				
-                }
-                else if(MQTT_RxDataOutPtr[2] == 0x90) { 
-                    switch(MQTT_RxDataOutPtr[6]) {					
-                        case 0x00 :
-                        case 0x01 : 
-                            Serial_Printf("订阅成功\r\n");
-                            SubcribePack_flag = 1;
-                            Ping_flag = 0;
-                            TIM3_ENABLE_30S();
-                            TIM2_Int_Init(5000,7199);
-                            break;                                             
-                        default   : 
-                            Serial_Printf("订阅失败，准备重启\r\n");
-                            Connect_flag = 0;
-                            break;								
-                    }					
-                }
-                else if(MQTT_RxDataOutPtr[2] == 0xD0) { 
-                    Serial_Printf("PING报文回复\r\n");
-                    if(Ping_flag == 1) {
-                        Ping_flag = 0;
-                    } else if(Ping_flag > 1) {
-                        Ping_flag = 0;
-                        TIM3_ENABLE_30S();
-                    }				
-                }	
-                else if(MQTT_RxDataOutPtr[2] == 0x30) { 
-                    Serial_Printf("服务器等级0推送\r\n");
-                    MQTT_DealPushdata_Qs0(MQTT_RxDataOutPtr);
-                    MQTT_RxDataOutPtr += BUFF_UNIT;
-                    if(MQTT_RxDataOutPtr == MQTT_RxDataEndPtr)
-                        MQTT_RxDataOutPtr = MQTT_RxDataBuf[0];
-                }
-                MQTT_RxDataOutPtr += BUFF_UNIT;
-                if(MQTT_RxDataOutPtr == MQTT_RxDataEndPtr)
-                    MQTT_RxDataOutPtr = MQTT_RxDataBuf[0];
-            } // 结束接收缓冲区处理
-        } 
-        else {
-            Serial_Printf("需要连接服务器\r\n");
-            WiFi_RxCounter = 0;                        
-            memset(WiFi_RX_BUF, 0, WiFi_RXBUFF_SIZE);
-            if(WiFi_Connect_IoTServer() == 0) {   			     
-                Serial_Printf("建立TCP连接成功\r\n");
-                Connect_flag = 1;	                           
-                WiFi_RxCounter = 0;                        
-                memset(WiFi_RX_BUF, 0, WiFi_RXBUFF_SIZE);
-                MQTT_Buff_ReInit();
-                Serial_Printf("已成功上载所有控制参数!\r\n");
-            }				
-        }
-		
+    while (1) {			
 		
         // 按键处理
         Key_Value key = Key_Scan();
@@ -315,7 +164,7 @@ int main(void)
                     char lcd_line1[17];
                     snprintf(lcd_line1, sizeof(lcd_line1), "PM2.5:%4.2fug/m3", pm_data.pm25_value);
 					g_pm25 = pm_data.pm25_value;
-					
+					Soil_status = SoilHumidity_Read();
                     if (pm_data.pm25_value != 0) {
                         LCD_Clear();
                         LCD_PrintString(1, 0, lcd_line1);
@@ -410,21 +259,27 @@ int main(void)
 				g_noise = noise_adc;
                 sprintf(display_str, "%3d", noise_adc);
                 LCD_PrintString(NOISE_STR_ROW, 7, display_str);
-				
+
+                //获取土壤湿度状态和蜂鸣器状态
+                Soil_status = SoilHumidity_Read();
+                beep_status = GPIO_ReadInputDataBit(BEEP_GPIO,BEEP_PIN); // 蜂鸣器状态
+
+
+                PM25_Data pm_data = PM25_GetCurrentData();
+                if (pm_data.data_valid) {
+                    g_pm25 = pm_data.pm25_value;
+                }
                 break;
 				
 				
             }
         }
 		
-		// 定时上传传感器数据
-		if(Upload_TimeOK == 1) {
-			Upload_TimeOK = 0;
-			if(Connect_flag == 1) { // 确保连接正常
-				Upload_Sensor_Data();
-			}
-		}
-		
+        userHandle();
+        
+        gizwitsHandle((dataPoint_t *)&currentDataPoint);
+//		
         delay_ms(200);  // 刷新周期
     }
 }
+

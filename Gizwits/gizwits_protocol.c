@@ -106,40 +106,6 @@ static int8_t gizProtocolWaitAck(uint8_t *gizdata, uint32_t len)
     return 0;
 }
 /**
-* @brief Calculates the byte size occupied by the bit
-*
-* @param [in] aFlag: P0 flag data
-*
-* @return: byte size
-*/
-uint32_t ICACHE_FLASH_ATTR calculateDynamicBitPartLen(dataPointFlags_t *aFlag)
-{
-    uint32_t bitFieldBitLen = 0,bytetmpLen= 0;
-    /* Processing only writable bool Enum type data */
-    if(0x01 == aFlag->flagled)
-    {
-        bitFieldBitLen += led_LEN;
-    }
-
-    if(0 == bitFieldBitLen)
-    {
-        bytetmpLen = 0;
-    }
-    else
-    {
-        if(0 == bitFieldBitLen%8)
-        {
-            bytetmpLen = bitFieldBitLen/8;
-        }
-        else
-        {
-            bytetmpLen = bitFieldBitLen/8 + 1;
-        }
-    }
-    return bytetmpLen;
-}
-
-/**
 * @brief generates "controlled events" according to protocol
 
 * @param [in] issuedData: Controlled data
@@ -147,47 +113,34 @@ uint32_t ICACHE_FLASH_ATTR calculateDynamicBitPartLen(dataPointFlags_t *aFlag)
 * @param [out] dataPoints: data point data
 * @return 0, the implementation of success, non-0, failed
 */
-static int8_t ICACHE_FLASH_ATTR gizDataPoint2Event(uint8_t *issuedData, eventInfo_t *info, dataPoint_t *dataPoints)
+static int8_t ICACHE_FLASH_ATTR gizDataPoint2Event(gizwitsIssued_t *issuedData, eventInfo_t *info, dataPoint_t *dataPoints)
 {
-    uint32_t bitFieldByteLen= 0;//Bit segment length
-    uint32_t bitFieldOffset = 0;//Bit position offset
-    uint32_t byteFieldOffset = 0;//Byte segment offset
-
-    gizwitsElongateP0Form_t elongateP0FormTmp;
-    gizMemset((uint8_t *)&elongateP0FormTmp,0,sizeof(gizwitsElongateP0Form_t));
-    gizMemcpy((uint8_t *)&elongateP0FormTmp.devDatapointFlag,issuedData,DATAPOINT_FLAG_LEN);
-
     if((NULL == issuedData) || (NULL == info) ||(NULL == dataPoints))
     {
         GIZWITS_LOG("gizDataPoint2Event Error , Illegal Param\n");
         return -1;
     }
-	
+    
     /** Greater than 1 byte to do bit conversion **/
-    if(DATAPOINT_FLAG_LEN > 1)
+    if(sizeof(issuedData->attrFlags) > 1)
     {
-        if(-1 == gizByteOrderExchange((uint8_t *)&elongateP0FormTmp.devDatapointFlag,DATAPOINT_FLAG_LEN))
+        if(-1 == gizByteOrderExchange((uint8_t *)&issuedData->attrFlags,sizeof(attrFlags_t)))
         {
             GIZWITS_LOG("gizByteOrderExchange Error\n");
             return -1;
         }
     }
-    /* Calculates the byte length occupied by the segment */
-    bitFieldByteLen = calculateDynamicBitPartLen(&elongateP0FormTmp.devDatapointFlag);
-    byteFieldOffset += bitFieldByteLen + DATAPOINT_FLAG_LEN;//Value segment byte offset
-
-    if(0x01 == elongateP0FormTmp.devDatapointFlag.flagled)
+    
+    if(0x01 == issuedData->attrFlags.flagBeep)
     {
-        info->event[info->num] = EVENT_led;
+        info->event[info->num] = EVENT_Beep;
         info->num++;
-        dataPoints->valueled = gizVarlenDecompressionValue(bitFieldOffset,led_LEN,(uint8_t *)&issuedData[DATAPOINT_FLAG_LEN],bitFieldByteLen);
-        bitFieldOffset += led_LEN;
+        dataPoints->valueBeep = gizStandardDecompressionValue(Beep_BYTEOFFSET,Beep_BITOFFSET,Beep_LEN,(uint8_t *)&issuedData->attrVals.wBitBuf,sizeof(issuedData->attrVals.wBitBuf));
     }
-
-
+        
+    
     return 0;
 }
-
 
 /**
 * @brief contrasts the current data with the last data
@@ -209,29 +162,46 @@ static int8_t ICACHE_FLASH_ATTR gizCheckReport(dataPoint_t *cur, dataPoint_t *la
         return -1;
     }
     currentTime = gizGetTimerCount();
-
-    if(last->valueled != cur->valueled)
+    if(last->valueBeep != cur->valueBeep)
     {
-        GIZWITS_LOG("valueled Changed\n");
-        gizwitsProtocol.waitReportDatapointFlag.flagled = 1;
+        GIZWITS_LOG("valueBeep Changed\n");
+        ret = 1;
+    }
+    if(last->valueSoilHumi != cur->valueSoilHumi)
+    {
+        GIZWITS_LOG("valueSoilHumi Changed\n");
         ret = 1;
     }
 
-    if(last->valuetemp != cur->valuetemp)
+    if(last->valueTemp != cur->valueTemp)
     {
         if(currentTime - lastReportTime >= REPORT_TIME_MAX)
         {
-            GIZWITS_LOG("valuetemp Changed\n");
-            gizwitsProtocol.waitReportDatapointFlag.flagtemp = 1;
+            GIZWITS_LOG("valueTemp Changed\n");
             ret = 1;
         }
     }
-    if(last->valuehumi != cur->valuehumi)
+    if(last->valueHumi != cur->valueHumi)
     {
         if(currentTime - lastReportTime >= REPORT_TIME_MAX)
         {
-            GIZWITS_LOG("valuehumi Changed\n");
-            gizwitsProtocol.waitReportDatapointFlag.flaghumi = 1;
+            GIZWITS_LOG("valueHumi Changed\n");
+            ret = 1;
+        }
+    }
+    if(last->valueNoise != cur->valueNoise)
+    {
+        if(currentTime - lastReportTime >= REPORT_TIME_MAX)
+        {
+            GIZWITS_LOG("valueNoise Changed\n");
+            ret = 1;
+        }
+    }
+    if(last->valuePM25 != cur->valuePM25)
+    {
+        if(currentTime - lastReportTime >= REPORT_TIME_MAX)
+        {
+            GIZWITS_LOG("valuePM25 Changed\n");
             ret = 1;
         }
     }
@@ -240,7 +210,6 @@ static int8_t ICACHE_FLASH_ATTR gizCheckReport(dataPoint_t *cur, dataPoint_t *la
     {
         lastReportTime = gizGetTimerCount();
     }
-
     return ret;
 }
 
@@ -252,81 +221,31 @@ static int8_t ICACHE_FLASH_ATTR gizCheckReport(dataPoint_t *cur, dataPoint_t *la
 *
 * @return 0, the correct return; -1, the error returned
 */
-static int8_t ICACHE_FLASH_ATTR gizDataPoints2ReportData(dataPoint_t *dataPoints , uint8_t *outData,uint32_t *outDataLen)
+static int8_t ICACHE_FLASH_ATTR gizDataPoints2ReportData(dataPoint_t *dataPoints , devStatus_t *devStatusPtr)
 {
-    uint32_t bitFieldByteLen= 0;//Bit byte size
-    uint32_t bitFieldOffset = 0;//Bit offset
-    uint32_t byteFieldOffset = 0;//Byte offset
-	devStatus_t devStatusTmp;//Temporary device data point variable
-    uint8_t allDatapointByteBuf[sizeof(gizwitsElongateP0Form_t)];//Open up the largest data point space
-    gizMemset(allDatapointByteBuf,0,sizeof(gizwitsElongateP0Form_t));
-
-    gizMemcpy(allDatapointByteBuf,(uint8_t *)&gizwitsProtocol.waitReportDatapointFlag,DATAPOINT_FLAG_LEN);
-    if(DATAPOINT_FLAG_LEN > 1)
-    {
-        gizByteOrderExchange(allDatapointByteBuf,DATAPOINT_FLAG_LEN);
-    }
-    byteFieldOffset += DATAPOINT_FLAG_LEN;//First offset the flag size of the location
-        
-    if((NULL == dataPoints) || (NULL == outData))
+    if((NULL == dataPoints) || (NULL == devStatusPtr))
     {
         GIZWITS_LOG("gizDataPoints2ReportData Error , Illegal Param\n");
         return -1;
     }
 
-    /*** Fill the bit ***/
-    if(gizwitsProtocol.waitReportDatapointFlag.flagled)
-    {
-        gizVarlenCompressValue(bitFieldOffset,led_LEN,(uint8_t *)&allDatapointByteBuf[byteFieldOffset],dataPoints->valueled);
-        bitFieldOffset += led_LEN;
-    }
+    gizMemset((uint8_t *)devStatusPtr->wBitBuf,0,sizeof(devStatusPtr->wBitBuf));
+    gizMemset((uint8_t *)devStatusPtr->rBitBuf,0,sizeof(devStatusPtr->rBitBuf));
 
-    /* The bit segment is assembled and the offset of the value segment is calculated */
-    if(0 == bitFieldOffset)
-    {
-        bitFieldByteLen = 0;
-    }
-    else
-    {
-        if(0 == bitFieldOffset%8)
-        {
-            bitFieldByteLen = bitFieldOffset/8;
-        }
-        else
-        {
-            bitFieldByteLen = bitFieldOffset/8 + 1;
-        }
-    }
-    /** Bitwise byte order conversion **/
-    if(bitFieldByteLen > 1)
-    {
-        gizByteOrderExchange((uint8_t *)&allDatapointByteBuf[byteFieldOffset],bitFieldByteLen);
-    }
-    
-    byteFieldOffset += bitFieldByteLen;//Offset the number of bytes occupied by the bit segment
+    gizStandardCompressValue(Beep_BYTEOFFSET,Beep_BITOFFSET,Beep_LEN,(uint8_t *)devStatusPtr,dataPoints->valueBeep);
+    gizStandardCompressValue(SoilHumi_BYTEOFFSET,SoilHumi_BITOFFSET,SoilHumi_LEN,(uint8_t *)devStatusPtr,dataPoints->valueSoilHumi);
+    gizByteOrderExchange((uint8_t *)devStatusPtr->wBitBuf,sizeof(devStatusPtr->wBitBuf));
+    gizByteOrderExchange((uint8_t *)devStatusPtr->rBitBuf,sizeof(devStatusPtr->rBitBuf));
 
-    /*** Handle the value segment ***/
+    devStatusPtr->valueTemp = gizY2X(Temp_RATIO,  Temp_ADDITION, dataPoints->valueTemp); 
+    devStatusPtr->valueHumi = gizY2X(Humi_RATIO,  Humi_ADDITION, dataPoints->valueHumi); 
+    devStatusPtr->valueNoise = gizY2X(Noise_RATIO,  Noise_ADDITION, dataPoints->valueNoise); 
 
-    if(gizwitsProtocol.waitReportDatapointFlag.flagtemp)
-    {
-        devStatusTmp.valuetemp = gizY2X(temp_RATIO,  temp_ADDITION, dataPoints->valuetemp); 
-        gizMemcpy((uint8_t *)&allDatapointByteBuf[byteFieldOffset],(uint8_t *)&devStatusTmp.valuetemp,temp_LEN);
-        byteFieldOffset += temp_LEN;
-    }
-    if(gizwitsProtocol.waitReportDatapointFlag.flaghumi)
-    {
-        devStatusTmp.valuehumi = gizY2X(humi_RATIO,  humi_ADDITION, dataPoints->valuehumi); 
-        gizMemcpy((uint8_t *)&allDatapointByteBuf[byteFieldOffset],(uint8_t *)&devStatusTmp.valuehumi,humi_LEN);
-        byteFieldOffset += humi_LEN;
-    }
-
-
-
-
-
-    gizMemset((uint8_t *)&gizwitsProtocol.waitReportDatapointFlag,0,DATAPOINT_FLAG_LEN);//Clear the flag
-    *outDataLen = byteFieldOffset;
-    gizMemcpy(outData,allDatapointByteBuf,*outDataLen);
+   //devStatusPtr->valuePM25 = exchangeBytes(gizY2X(PM25_RATIO,  PM25_ADDITION, dataPoints->valuePM25));
+    devStatusPtr->valuePM25 = gizY2X(PM25_RATIO,  PM25_ADDITION, dataPoints->valuePM25);
+    // Serial_Printf("**********************************\r\n");
+    // Serial_Printf("\r\ndevStatusPtr->valuePM25 = %d\n",devStatusPtr->valuePM25);
+    // Serial_Printf("**********************************\r\n");
     return 0;
 }
 
@@ -348,58 +267,49 @@ static int8_t gizProtocolIssuedProcess(char *did, uint8_t *inData, uint32_t inLe
         GIZWITS_LOG("gizProtocolIssuedProcess Error , Illegal Param\n");
         return -1;
     }
-
+    
     if(NULL == did)
     {
-    memset((uint8_t *)&gizwitsProtocol.issuedProcessEvent, 0, sizeof(eventInfo_t));
-    switch(issuedAction)
-    {
-        case ACTION_CONTROL_DEVICE:
-            GIZWITS_LOG("ACTION_ELONGATE_CONTROL_DEVICE \n");
-            gizDataPoint2Event(&inData[1], &gizwitsProtocol.issuedProcessEvent,&gizwitsProtocol.gizCurrentDataPoint);
-            gizwitsProtocol.issuedFlag = ACTION_CONTROL_TYPE;
-            outData = NULL;
-            *outLen = 0;
-            break;
-        
-        case ACTION_READ_DEV_STATUS:
-            GIZWITS_LOG("ACTION_ELONGATE_READ_DEV_STATUS \n");          
-            memcpy((uint8_t *)&gizwitsProtocol.waitReportDatapointFlag,&inData[1],DATAPOINT_FLAG_LEN);//拷贝查询FLAG               
-            if(DATAPOINT_FLAG_LEN > 1)
-            {
-                    gizByteOrderExchange((uint8_t *)&gizwitsProtocol.waitReportDatapointFlag,DATAPOINT_FLAG_LEN);
-            }
-                        
-            if(0 == gizDataPoints2ReportData(&gizwitsProtocol.gizLastDataPoint,gizwitsProtocol.reportData,(uint32_t *)&gizwitsProtocol.reportDataLen))
-            {  
-                memcpy(outData+1, (uint8_t *)&gizwitsProtocol.reportData, gizwitsProtocol.reportDataLen);
-                outData[0] = ACTION_READ_DEV_STATUS_ACK;
-                *outLen = DATAPOINT_FLAG_LEN + sizeof(gizwitsReport_t)+1;
-            }
-            else
-            {
-                return -1;
-            }
-            break;
-        case ACTION_W2D_TRANSPARENT_DATA:
-            memcpy(gizwitsProtocol.transparentBuff, &inData[1], inLen-1);
-            gizwitsProtocol.transparentLen = inLen - 1;
+        memset((uint8_t *)&gizwitsProtocol.issuedProcessEvent, 0, sizeof(eventInfo_t));
+        switch(issuedAction)
+        {
+            case ACTION_CONTROL_DEVICE:
+                gizDataPoint2Event((gizwitsIssued_t *)&inData[1], &gizwitsProtocol.issuedProcessEvent,&gizwitsProtocol.gizCurrentDataPoint);
+                gizwitsProtocol.issuedFlag = ACTION_CONTROL_TYPE;
+                outData = NULL;
+                *outLen = 0;
+                break;
             
-            gizwitsProtocol.issuedProcessEvent.event[gizwitsProtocol.issuedProcessEvent.num] = TRANSPARENT_DATA;
-            gizwitsProtocol.issuedProcessEvent.num++;
-            gizwitsProtocol.issuedFlag = ACTION_W2D_TRANSPARENT_TYPE;
-            outData = NULL;
-            *outLen = 0;
-            break;
-        
-        default:
-            break;
+            case ACTION_READ_DEV_STATUS:
+                if(0 == gizDataPoints2ReportData(&gizwitsProtocol.gizLastDataPoint,&gizwitsProtocol.reportData.devStatus))
+                {
+                    memcpy(outData+1, (uint8_t *)&gizwitsProtocol.reportData.devStatus, sizeof(gizwitsReport_t));
+                    outData[0] = ACTION_READ_DEV_STATUS_ACK;
+                    *outLen = sizeof(gizwitsReport_t)+1;
+                }
+                else
+                {
+                    return -1;
+                }
+                break;
+            case ACTION_W2D_TRANSPARENT_DATA:
+                memcpy(gizwitsProtocol.transparentBuff, &inData[1], inLen-1);
+                gizwitsProtocol.transparentLen = inLen - 1;
+                
+                gizwitsProtocol.issuedProcessEvent.event[gizwitsProtocol.issuedProcessEvent.num] = TRANSPARENT_DATA;
+                gizwitsProtocol.issuedProcessEvent.num++;
+                gizwitsProtocol.issuedFlag = ACTION_W2D_TRANSPARENT_TYPE;
+                outData = NULL;
+                *outLen = 0;
+                break;
+            
+                default:
+                    break;
         }
     }
 
     return 0;
 }
-
 /**
 * @brief The protocol sends data back , P0 ACK
 *
@@ -439,16 +349,16 @@ static int32_t gizProtocolIssuedDataAck(protocolHead_t *head, uint8_t *gizdata, 
     GIZWITS_LOG("len = %d , sDidLen = %d ,data_len = %d\n", len,sDidLen,data_len);
     *pTxBuf ++= 0xFF;
     *pTxBuf ++= 0xFF;
-    *pTxBuf ++= (uint8_t)(data_len>>8);//len
+    *pTxBuf ++= (uint8_t)(data_len>>8);
     *pTxBuf ++= (uint8_t)(data_len);
     *pTxBuf ++= head->cmd + 1;
     *pTxBuf ++= head->sn;
     *pTxBuf ++= 0x00;
-    *pTxBuf ++= proFlag;//flag
+    *pTxBuf ++= proFlag;
     offset = 8;
     if(0x1 == proFlag)
     {
-        *pTxBuf ++= sDidLen;//didlen
+        *pTxBuf ++= sDidLen;
         offset += 1;
         memcpy(&tx_buf[offset],(uint8_t *)head+sizeof(protocolHead_t)+1,sDidLen);
         offset += sDidLen;
@@ -470,6 +380,7 @@ static int32_t gizProtocolIssuedDataAck(protocolHead_t *head, uint8_t *gizdata, 
 
     return 0;
 }
+
 /**
 * @brief Report data interface
 *
@@ -484,39 +395,31 @@ static int32_t gizProtocolIssuedDataAck(protocolHead_t *head, uint8_t *gizdata, 
 static int32_t gizReportData(uint8_t action, uint8_t *gizdata, uint32_t len)
 {
     int32_t ret = 0;
-    uint8_t tx_buf[MAX_PACKAGE_LEN];
-	uint8_t *pTxBuf = tx_buf;
-    uint16_t data_len = 6 + len;
+    protocolReport_t protocolReport;
+
     if(NULL == gizdata)
     {
         GIZWITS_LOG("gizReportData Error , Illegal Param\n");
         return -1;
     }
-
-    *pTxBuf ++= 0xFF;
-    *pTxBuf ++= 0xFF;
-    *pTxBuf ++= (uint8_t)(data_len>>8);
-    *pTxBuf ++= (uint8_t)(data_len);
-    *pTxBuf ++= CMD_REPORT_P0;
-    *pTxBuf ++= gizwitsProtocol.sn++;
-    *pTxBuf ++= 0x00;
-    *pTxBuf ++= 0x00;
-    *pTxBuf ++= action;
-
-    memcpy(&tx_buf[9],gizdata,len);
+    gizProtocolHeadInit((protocolHead_t *)&protocolReport);
+    protocolReport.head.cmd = CMD_REPORT_P0;
+    protocolReport.head.sn = gizwitsProtocol.sn++;
+    protocolReport.action = action;
+    protocolReport.head.len = exchangeBytes(sizeof(protocolReport_t)-4);
+    memcpy((gizwitsReport_t *)&protocolReport.reportData, (gizwitsReport_t *)gizdata,len);
+    protocolReport.sum = gizProtocolSum((uint8_t *)&protocolReport, sizeof(protocolReport_t));
     
-    tx_buf[data_len + 4 - 1 ] = gizProtocolSum( tx_buf , (data_len+4));
-    
-    ret = uartWrite(tx_buf, data_len+4);
+    ret = uartWrite((uint8_t *)&protocolReport, sizeof(protocolReport_t));
     if(ret < 0)
     {
         GIZWITS_LOG("ERR: uart write error %d \n", ret);
         return -2;
     }
 
-    gizProtocolWaitAck(tx_buf, data_len+4);
+    gizProtocolWaitAck((uint8_t *)&protocolReport, sizeof(protocolReport_t));
 
-    return 0;
+    return ret;
 }/**
 * @brief Datapoints reporting mechanism
 *
@@ -531,29 +434,27 @@ static void gizDevReportPolicy(dataPoint_t *currentData)
 {
     static uint32_t lastRepTime = 0;
     uint32_t timeNow = gizGetTimerCount();
-    uint8_t *waitReportDataPtr = NULL;
 
     if((1 == gizCheckReport(currentData, (dataPoint_t *)&gizwitsProtocol.gizLastDataPoint)))
     {
         GIZWITS_LOG("changed, report data\n");
-        if(0 == gizDataPoints2ReportData(currentData,gizwitsProtocol.reportData,(uint32_t *)&gizwitsProtocol.reportDataLen))
+        if(0 == gizDataPoints2ReportData(currentData,&gizwitsProtocol.reportData.devStatus))
         {
-            gizReportData(ACTION_REPORT_DEV_STATUS, gizwitsProtocol.reportData, gizwitsProtocol.reportDataLen);        }
+            gizReportData(ACTION_REPORT_DEV_STATUS, (uint8_t *)&gizwitsProtocol.reportData.devStatus, sizeof(devStatus_t));        }       
         memcpy((uint8_t *)&gizwitsProtocol.gizLastDataPoint, (uint8_t *)currentData, sizeof(dataPoint_t));
     }
 
     if((0 == (timeNow % (600000))) && (lastRepTime != timeNow))
     {
         GIZWITS_LOG("Info: 600S report data\n");
-        memset((uint8_t *)&gizwitsProtocol.waitReportDatapointFlag,0xFF,DATAPOINT_FLAG_LEN);
-        if(0 == gizDataPoints2ReportData(currentData,gizwitsProtocol.reportData,(uint32_t *)&gizwitsProtocol.reportDataLen))
+        if(0 == gizDataPoints2ReportData(currentData,&gizwitsProtocol.reportData.devStatus))
         {
-            gizReportData(ACTION_REPORT_DEV_STATUS, gizwitsProtocol.reportData, gizwitsProtocol.reportDataLen);        }
+            gizReportData(ACTION_REPORT_DEV_STATUS, (uint8_t *)&gizwitsProtocol.reportData.devStatus, sizeof(devStatus_t));
+        }       
         memcpy((uint8_t *)&gizwitsProtocol.gizLastDataPoint, (uint8_t *)currentData, sizeof(dataPoint_t));
 
         lastRepTime = timeNow;
     }
-    free(waitReportDataPtr);
 }
 
 /**
@@ -1140,10 +1041,19 @@ int32_t gizwitsSetMode(uint8_t mode)
         case WIFI_SOFTAP_MODE:
             gizProtocolHeadInit((protocolHead_t *)&cfgMode);
             cfgMode.head.cmd = CMD_WIFI_CONFIG;
-            cfgMode.head.sn = gizwitsProtocol.sn++;
+            //cfgMode.head.sn = gizwitsProtocol.sn++;
+            cfgMode.head.sn = 0x0A;
             cfgMode.cfgMode = mode;
             cfgMode.head.len = exchangeBytes(sizeof(protocolCfgMode_t)-4);
             cfgMode.sum = gizProtocolSum((uint8_t *)&cfgMode, sizeof(protocolCfgMode_t));
+
+            // 打印即将发送的数据
+            Serial_Printf("\r\n[Wi-Fi] modle: %d | data: ", mode);
+            for(int i = 0; i < sizeof(protocolCfgMode_t); i++) {
+                Serial_Printf("%02X ", *((uint8_t *)&cfgMode + i));
+            }
+            Serial_Printf("\r\n");
+
             ret = uartWrite((uint8_t *)&cfgMode, sizeof(protocolCfgMode_t));
             if(ret < 0)
             {
@@ -1154,11 +1064,21 @@ int32_t gizwitsSetMode(uint8_t mode)
         case WIFI_AIRLINK_MODE:
             gizProtocolHeadInit((protocolHead_t *)&cfgMode);
             cfgMode.head.cmd = CMD_WIFI_CONFIG;
-            cfgMode.head.sn = gizwitsProtocol.sn++;
+            //cfgMode.head.sn = gizwitsProtocol.sn++;
+            cfgMode.head.sn = 0x0A;
             cfgMode.cfgMode = mode;
             cfgMode.head.len = exchangeBytes(sizeof(protocolCfgMode_t)-4);
             cfgMode.sum = gizProtocolSum((uint8_t *)&cfgMode, sizeof(protocolCfgMode_t));
+
+            // 打印即将发送的数据
+            Serial_Printf("\r\n[Wi-Fi] modle: %d | data: ", mode);
+            for(int i = 0; i < sizeof(protocolCfgMode_t); i++) {
+                Serial_Printf("%02X ", *((uint8_t *)&cfgMode + i));
+            }
+            Serial_Printf("\r\n");
+
             ret = uartWrite((uint8_t *)&cfgMode, sizeof(protocolCfgMode_t));
+
             if(ret < 0)
             {
                 GIZWITS_LOG("ERR: uart write error %d \n", ret);

@@ -22,3 +22,4 @@ void PM25_ReceiveHandler(uint8_t data);
 PM25_Data PM25_GetCurrentData(void);
 
 #endif
+

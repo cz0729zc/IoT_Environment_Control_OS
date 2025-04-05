@@ -47,3 +47,9 @@
 .\objects\main.o: .\Hardware\timer4.h
 .\objects\main.o: .\Hardware\timer2.h
 .\objects\main.o: .\Hardware\timer3.h
+.\objects\main.o: .\Gizwits\gizwits_product.h
+.\objects\main.o: .\Gizwits\gizwits_protocol.h
+.\objects\main.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\objects\main.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\objects\main.o: .\Utils\common.h
+.\objects\main.o: D:\Development_Tool\Keil5\ARM\ARMCC\Bin\..\include\ctype.h

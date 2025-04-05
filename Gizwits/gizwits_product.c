@@ -16,15 +16,20 @@
 #include <stdio.h>
 #include <string.h>
 #include "gizwits_product.h"
-#include "usart2.h"
-#include "led.h"
-
-extern u8 temp;
-extern u8 humi;
+#include "usart3.h"
+#include "Beep.h"
+#include "gizwits_protocol.h"
+#include "gizwits_product.h"
 static uint32_t timerMsCount;
 
 /** Current datapoint */
 dataPoint_t currentDataPoint;
+extern float g_temperature;
+extern float g_humidity;
+extern uint16_t g_noise;
+extern float g_pm25;
+extern bool Soil_status;
+extern bool beep_status;
 
 /**@} */
 /**@name Gizwits User Interface
@@ -68,22 +73,20 @@ int8_t gizwitsEventProcess(eventInfo_t *info, uint8_t *gizdata, uint32_t len)
     {
         switch(info->event[i])
         {
-        case EVENT_led:
-            currentDataPoint.valueled = dataPointPtr->valueled;
-            GIZWITS_LOG("Evt: EVENT_led %d \n", currentDataPoint.valueled);
-            if(0x01 == currentDataPoint.valueled)
+        case EVENT_Beep:
+            currentDataPoint.valueBeep = dataPointPtr->valueBeep;
+            GIZWITS_LOG("Evt: EVENT_Beep %d \n", currentDataPoint.valueBeep);
+            if(0x01 == currentDataPoint.valueBeep)
             {
-							LED_On();
             //user handle
+                BEEP_On();
             }
             else
             {
-							LED_Off();
-            //user handle    
+            //user handle  
+                BEEP_Off();  
             }
             break;
-
-
 
 
         case WIFI_SOFTAP:
@@ -143,12 +146,20 @@ int8_t gizwitsEventProcess(eventInfo_t *info, uint8_t *gizdata, uint32_t len)
 */
 void userHandle(void)
 {
- 
-    currentDataPoint.valuetemp = temp;//Add Sensor Data Collection
-    currentDataPoint.valuehumi = humi;//Add Sensor Data Collection
+    currentDataPoint.valueTemp = g_temperature;//Add Sensor Data Collection
+    currentDataPoint.valueHumi = g_humidity;//Add Sensor Data Collection
+    currentDataPoint.valueSoilHumi = Soil_status;//Add Sensor Data Collection
+    currentDataPoint.valueNoise = g_noise;//Add Sensor Data Collection
+    currentDataPoint.valuePM25 = g_pm25;//Add Sensor Data Collection
+	
+    Serial_Printf("\r\n |-----------------");
+    Serial_Printf("\r\nTemp:%d", currentDataPoint.valueTemp);
+    Serial_Printf("\r\nHumidity:%d", currentDataPoint.valueHumi);
+    Serial_Printf("\r\nNoise:%3d", currentDataPoint.valueNoise);
+    Serial_Printf("\r\nPM2.5:%d", currentDataPoint.valuePM25);
+    Serial_Printf("\r\nSoil:%d", currentDataPoint.valueSoilHumi);
+    Serial_Printf("\r\n |-----------------");
 
-    
-    
 }
 
 /**
@@ -164,11 +175,12 @@ void userInit(void)
     memset((uint8_t*)&currentDataPoint, 0, sizeof(dataPoint_t));
     
     /** Warning !!! DataPoint Variables Init , Must Within The Data Range **/ 
-  
-    currentDataPoint.valueled = 0;
-    currentDataPoint.valuetemp = 0;
-    currentDataPoint.valuehumi = 0;
-    
+    currentDataPoint.valueBeep = 0;
+    currentDataPoint.valueTemp = 0;
+    currentDataPoint.valueHumi = 0;
+    currentDataPoint.valueSoilHumi = 0;
+    currentDataPoint.valueNoise = 0;
+    currentDataPoint.valuePM25 = 0;
 
 }
 
@@ -237,12 +249,12 @@ void TIMER_IRQ_FUN(void)
 * @param none
 * @return none
 */
-//void UART_IRQ_FUN(void)
-//{
-//  uint8_t value = 0;
-//  //value = USART_ReceiveData(USART2);//STM32 test demo
-//  gizPutData(&value, 1);
-//}
+void UART_IRQ_FUN(void)
+{
+  uint8_t value = 0;
+  //value = USART_ReceiveData(USART2);//STM32 test demo
+  gizPutData(&value, 1);
+}
 
 
 /**
@@ -274,20 +286,25 @@ int32_t uartWrite(uint8_t *buf, uint32_t len)
     GIZWITS_LOG("\n");
     #endif
 
+    // // 打印发送数据
+    // Serial_Printf("\r\n[Send] Lens: %d | data: ", len);
+    // for(i = 0; i < len; i++) {
+    //     Serial_Printf("%02X ", buf[i]); // 16进制格式
+    // }
+    // Serial_Printf("\r\n");
+
     for(i=0; i<len; i++)
     {
-        USART_SendData(USART2, buf[i]);//STM32 test demo
-				while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
+        USART_SendData(USART3, buf[i]);//STM32 test demo
         //Serial port to achieve the function, the buf[i] sent to the module
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET);
         if(i >=2 && buf[i] == 0xFF)
         {
-					USART_SendData(USART2,0x55);
-					while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
           //Serial port to achieve the function, the 0x55 sent to the module
-          //USART_SendData(UART, 0x55);//STM32 test demo
+          USART_SendData(USART3, 0x55);//STM32 test demo
+			while(USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET);
         }
     }
-
     return len;
 }
 
