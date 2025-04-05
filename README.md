@@ -4,5 +4,5 @@
 采用STM32单片机做。WIFI模块连接阿里云物联网平台
 
 
-maser 为阿里云MQTT，AT
+master 为阿里云MQTT，AT
 develop 为机智云
