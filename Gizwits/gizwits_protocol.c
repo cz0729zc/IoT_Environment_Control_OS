@@ -1042,7 +1042,7 @@ int32_t gizwitsSetMode(uint8_t mode)
             gizProtocolHeadInit((protocolHead_t *)&cfgMode);
             cfgMode.head.cmd = CMD_WIFI_CONFIG;
             //cfgMode.head.sn = gizwitsProtocol.sn++;
-            cfgMode.head.sn = 0x0A;
+            cfgMode.head.sn = 0x0A;   //官方代码中的sn为00，实际测试为0x0A
             cfgMode.cfgMode = mode;
             cfgMode.head.len = exchangeBytes(sizeof(protocolCfgMode_t)-4);
             cfgMode.sum = gizProtocolSum((uint8_t *)&cfgMode, sizeof(protocolCfgMode_t));
